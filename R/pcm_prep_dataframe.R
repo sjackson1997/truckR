@@ -55,7 +55,6 @@ pcm_lst_address <- list(
   StateAbbreviation = "stabbrev"
 )
 
-
 match_columns <- function(column_names, regex_list) {
   matched_columns <- lapply(regex_list, function(regex, cols) {
     # Use grepl to find matches for the current regex in the column names
