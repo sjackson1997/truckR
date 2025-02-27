@@ -1,17 +1,21 @@
+#  https://developer.trimblemaps.com/restful-apis/location/geocoding-api/geocoding/
+# This list is from the Address portion of the geocoding api
 
 pcm_address_regexes <- list(
-  Country = "ctry",
-  CountryAbbreviation = "ctryabbrev",
-  CountryPostalFilter = "cpf",
+  StreetAddress = "(address)|(addr)",
+  City = "city",
   State = "state",
-  StateName = "statename",
-  County = "county",
-  City  = "city",
   Zip = "(zip)|(postal)",
-  StreetAddress = "address",
+  County = "county",
+  Country = "(ctry)|(country)",
   SPLC = "splc",
+  CountryPostalFilter = "cpf",
   AbbreviationFormat = "isoformat",
-  StateAbbreviation = "stabbrev"
+  StateName = "statename",
+  StateAbbreviation = "stabbrev",
+  CountryAbbreviation = "ctryabbrev"
 )
 
-usethis::use_data(pcm_address_regexes, internal = TRUE)
+usethis::use_data(pcm_address_regexes,
+                  overwrite = TRUE,
+                  internal = TRUE)
