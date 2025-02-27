@@ -18,7 +18,7 @@ pcm_prep_dataframe <- function(df){
       "RTE",
       str_pad(
         cur_group_id(),
-        width = 6,
+        width = ceiling(log(dim(.)[1], base = 10))+1,
         side = "left",
         pad = "0"
       ),
@@ -42,23 +42,6 @@ pcm_prep_dataframe <- function(df){
   return(lst_out)
 
 }
-
-
-# Define a function to create the JSON structure for each row
-pcm_lst_address <- list(
-  Country = "ctry",
-  CountryAbbreviation = "ctryabbrev",
-  CountryPostalFilter = "cpf",
-  State = "state",
-  StateName = "statename",
-  County = "county",
-  City  = "city",
-  Zip = "zip",
-  StreetAddress = "address",
-  SPLC = "splc",
-  AbbreviationFormat = "isoformat",
-  StateAbbreviation = "stabbrev"
-)
 
 match_columns <- function(column_names, regex_list) {
   matched_columns <- lapply(regex_list, function(regex, cols) {
