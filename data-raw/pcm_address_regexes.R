@@ -1,4 +1,5 @@
 #  https://developer.trimblemaps.com/restful-apis/location/geocoding-api/geocoding/
+#  https://developer.trimblemaps.com/restful-apis/appendix/shared-objects/#address
 # This list is from the Address portion of the geocoding api
 
 pcm_address_regexes <- list(
