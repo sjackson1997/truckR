@@ -2,6 +2,8 @@ pcm_prep_dataframe <- function(df) {
   lst <- get_location_columns1(df)
   v_names <- lst$v_names
 
+
+
   df_labeled <- df %>%
     arrange(!!!syms(v_names)) %>%
     group_by(across(all_of(v_names))) %>%
