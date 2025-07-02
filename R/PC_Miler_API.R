@@ -41,11 +41,7 @@ df_lanes <- readRDS("C:/Users/KQV2764/OneDrive - MDLZ/AdvancedDataAnalyst/Projec
 
 
 
-split_df_to_size <- function(df, rows_per_chunk = 20) {
-  group_factor <- ceiling(seq_along(df[[1]]) / rows_per_chunk)
-  list_of_dfs_out <- split(df, group_factor)
-  return(list_of_dfs_out)
-}
+
 
 
 convert_row_to_list <- function(df, pcm_lst_addressHdrs, i) {
