@@ -44,15 +44,6 @@ df_lanes <- readRDS("C:/Users/KQV2764/OneDrive - MDLZ/AdvancedDataAnalyst/Projec
 
 
 
-convert_row_to_list <- function(df, pcm_lst_addressHdrs, i) {
-  setNames(
-    lapply(pcm_lst_addressHdrs, function(column_name) {
-      df[[column_name]][i]
-    }),
-    names(pcm_lst_addressHdrs)
-  )
-}
-
 
 # Function to convert the complex list structure into a dataframe
 pcm_MileageReport_to_df <- function(report_list) {
