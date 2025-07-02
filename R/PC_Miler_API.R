@@ -1,6 +1,3 @@
-library(tidyverse)
-library(httr)
-library(jsonlite)
 
 PC_MILER_API_KEY <- Sys.getenv("PC_MILER_API_KEY")
 
@@ -19,10 +16,10 @@ lst_out <- list()
 for (i in seq_along(req)) {
   THE_REQUEST <- paste0(base_url, req[i])
 
-  THE_RESPONSE <- GET(THE_REQUEST, add_headers(Authorization = PC_MILER_API_KEY))
+  THE_RESPONSE <- httr::GET(THE_REQUEST, httr::add_headers(Authorization = PC_MILER_API_KEY))
   THE_RESPONSE
   THE_RESPONSE$content
-  lst_out <- append(lst_out, content(THE_RESPONSE))
+  lst_out <- append(lst_out, httr::content(THE_RESPONSE))
 }
 
 lst_out
@@ -84,7 +81,7 @@ pcm_Route_json <- function(df, ReportType = "MileageReportType",
     )
   }))
 
-  pcm_JSON_out <- toJSON(tl, auto_unbox = TRUE, pretty = TRUE)
+  pcm_JSON_out <- jsonlite::toJSON(tl, auto_unbox = TRUE, pretty = TRUE)
 }
 
 
@@ -159,29 +156,29 @@ pcm_POST <- function(df, lst_origins = lst_origins,
     lst_destinations = lst_destinations
   )
 
-  pcm_response <- POST(
+  pcm_response <- httr::POST(
     url = route_url_post,
-    add_headers(Authorization = PC_MILER_API_KEY),
+    httr::add_headers(Authorization = PC_MILER_API_KEY),
     body = pcm_json,
-    content_type_json(),
+    httr::content_type_json(),
     encode = "json"
   )
 
-  df_result <- pcm_MileageReport_to_df(content(pcm_response))
+  df_result <- pcm_MileageReport_to_df(httr::content(pcm_response))
 
   route_list <- split(df_result, df_result$Label)
 
   df_destination <- route_list$Destination %>%
-    rename_with(~ sprintf("%s%s", "dest_", .), .cols = !RouteId) %>%
-    glimpse()
+    dplyr::rename_with(~ sprintf("%s%s", "dest_", .), .cols = !RouteId) %>%
+    dplyr::glimpse()
 
   df_origin <- route_list$Origin %>%
-    select(!c(Label, LMiles:TEstghg)) %>%
-    rename_with(~ sprintf("%s%s", "orig_", .), .cols = !RouteId) %>%
-    glimpse()
+    dplyr::select(!c(Label, LMiles:TEstghg)) %>%
+    dplyr::rename_with(~ sprintf("%s%s", "orig_", .), .cols = !RouteId) %>%
+    dplyr::glimpse()
 
-  df_routes <- full_join(df_origin, df_destination, by = "RouteId") %>%
-    glimpse()
+  df_routes <- dplyr::full_join(df_origin, df_destination, by = "RouteId") %>%
+    dplyr::glimpse()
 
   return(df_routes)
 }
