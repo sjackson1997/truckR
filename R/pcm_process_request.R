@@ -1,3 +1,11 @@
+#' Title
+#'
+#' @param lst
+#'
+#' @return
+#' @export
+#'
+#' @examples
 pcm_process_request <- function(lst) {
   lst_to_process <- split_df_to_size(lst$Unique)
 
@@ -19,10 +27,4 @@ pcm_process_request <- function(lst) {
 
   df_final <- left_join(lst$Labeled, df_routes, by = "RouteId") %>%
     glimpse()
-}
-
-split_df_to_size <- function(df, rows_per_chunk = 20) {
-  group_factor <- ceiling(seq_along(df[[1]]) / rows_per_chunk)
-  list_of_dfs_out <- split(df, group_factor)
-  return(list_of_dfs_out)
 }
