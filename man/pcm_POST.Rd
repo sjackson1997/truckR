@@ -4,7 +4,20 @@
 \alias{pcm_POST}
 \title{Title}
 \usage{
-pcm_POST(df, lst_origins = lst_origins, lst_destinations = lst_destinations)
+pcm_POST(
+  df,
+  lst_origins = lst_origins,
+  lst_destinations = lst_destinations,
+  route_url_post =
+    "https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/route/routeReports?dataVersion=Current",
+  api_key = Sys.getenv("PC_MILER_API_KEY")
+)
+}
+\arguments{
+\item{route_url_post}{URL of the PC Miler route reports endpoint.}
+
+\item{api_key}{PC Miler API key. Defaults to the \code{PC_MILER_API_KEY}
+environment variable, read at call time (never stored in the package).}
 }
 \description{
 Title
