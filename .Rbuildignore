@@ -4,3 +4,8 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^LICENSE\.md$
+^\.kiro$
+^scratch\.R$
+^TODO_package_plan\.md$
+^_check_detail\.R$
+^\.Rhistory$

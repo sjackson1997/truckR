@@ -6,9 +6,6 @@
 \usage{
 pcm_POST(df, lst_origins = lst_origins, lst_destinations = lst_destinations)
 }
-\arguments{
-\item{lst_destinations}{}
-}
 \description{
 Title
 }

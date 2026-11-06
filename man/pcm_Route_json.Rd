@@ -13,8 +13,6 @@ pcm_Route_json(
 }
 \arguments{
 \item{df}{A dataframe containing origin/destination column(s).}
-
-\item{lst_destinations}{}
 }
 \description{
 Convert dataframe of origin/destination pairs to JSON file for PC Miler API

@@ -6,9 +6,6 @@
 \usage{
 pcm_process_request(lst)
 }
-\arguments{
-\item{lst}{}
-}
 \description{
 Title
 }

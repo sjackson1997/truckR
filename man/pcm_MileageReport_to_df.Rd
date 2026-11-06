@@ -6,9 +6,6 @@
 \usage{
 pcm_MileageReport_to_df(report_list)
 }
-\arguments{
-\item{report_list}{}
-}
 \description{
 Title
 }
