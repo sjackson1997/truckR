@@ -30,7 +30,7 @@ Working rules for every task:
   - Done when: all cases covered by passing tests and no network is used.
   - _Requirements: 13.1, 13.2, 13.4_
 
-- [ ] 3. Implement `prep_lanes()` (column mapping and lane identity)
+- [x] 3. Implement `prep_lanes()` (column mapping and lane identity)
   - Internal function that reuses `get_location_columns1()` to find origin and destination columns, including the optional street address component.
   - Stop with a clear list of the missing components when required ones (city/state/zip/country as available per location) cannot be matched.
   - Normalize with `fix.ZIP()` and `fix.CTRY()`; assign a lane-level `RouteId` per distinct origin, destination and waypoint-usage combination; keep the original rows and order so results can be joined back to every row.

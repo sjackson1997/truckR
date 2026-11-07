@@ -22,7 +22,7 @@ flowchart TD
 
 Existing `pcm_*` functions are left untouched and are not part of this pipeline (Note A). New code does not use the `pcm_` prefix.
 
-## Components
+## Components and Interfaces
 
 ### 1. `route()` (exported): the entry point
 
@@ -53,9 +53,11 @@ NA in `Use_Waypoint` is treated as FALSE. The "absent but waypoint supplied" cas
 
 Generalizes the useful part of `pcm_prep_dataframe()`:
 
-- Reuses `get_location_columns1()` to find origin/destination City, State, Zip and Country columns (Requirement 9.1, 9.2). Stops with a list of missing components if required ones are absent (9.3).
-- Normalizes with the existing `fix.ZIP()` and `fix.CTRY()`.
-- Assigns a lane-level `RouteId` per distinct combination of origin, destination **and waypoint usage** (13.5), preserving the original row order and joining results back onto every original row.
+- Reuses `get_location_columns1()` to find origin/destination street address, city, state, zip and country columns (Requirement 9.1, 9.2, 9.5). Each side needs at least one of street address, zip or city; otherwise it stops with a message listing what was searched for and the available columns (9.3). State and country are optional; a missing country column produces a message because locations then cannot be restricted to a country (14.2). When several columns match one component (for example `orig_state` and `orig_statename`) the shortest column name is used and a message lists the others.
+- Normalizes with the existing `fix.ZIP()` and `fix.CTRY()` (countries become `USA`, `MEX` or `CAN`; `fix.CTRY()` was extended to handle "U.S." and "Mexico"). Blank text becomes `NA`. Postal codes are normalized but not validated, so a malformed code such as a truncated `L8E` passes through; rejecting or flagging it is the geocoder's job (Requirement 14.5).
+- Assigns a lane-level `RouteId` per distinct combination of origin, destination **and waypoint usage** (13.5), ignoring letter case, numbered in order of first appearance, preserving the original row order and joining results back onto every original row.
+- A row with no street address, zip or city on one side is kept and flagged in `lane_error`, so only that lane is affected downstream (Property 9).
+- Returns `lanes` (one row per input row, standardized `orig_*`/`dest_*` component columns), `unique_lanes` (one row per `RouteId` with a count), and the original column names used.
 
 ### 3. `build_segments()` (internal): expansion and de-duplication
 
@@ -139,6 +141,70 @@ For each lane, using its segment ids:
 ### Added only when any lane uses a waypoint (NA otherwise)
 
 `waypoint_value`, `waypoint_type`, `detour_added` (miles), `detour_duration_added` (hours).
+
+## Correctness Properties
+
+These are statements that must hold for every input, not just the examples we happen to test. Each is checked by one or more tests (see Testing Strategy), mostly with a fake provider so no API quota is used.
+
+### Property 1: Row preservation
+The Route_Result has exactly the rows of the input, in the same order, with the original columns unchanged.
+
+**Validates: Requirements 1.3, 9.4**
+
+### Property 2: Always-present columns
+Every Route_Result contains `distance_direct`, `distance_routed`, `duration_direct`, `duration_routed` and `has_waypoint`, whether or not any lane uses a waypoint.
+
+**Validates: Requirements 13.6**
+
+### Property 3: No waypoint, no extra columns
+When no lane uses a waypoint, the Route_Result contains none of `waypoint_value`, `waypoint_type`, `detour_added` or `detour_duration_added`.
+
+**Validates: Requirements 13.7**
+
+### Property 4: Non-waypoint lanes
+For a lane that does not use a waypoint, `has_waypoint` is FALSE, `distance_routed` equals `distance_direct`, `duration_routed` equals `duration_direct`, and any waypoint-only columns are NA.
+
+**Validates: Requirements 13.6, 13.8**
+
+### Property 5: Waypoint lanes are the sum of two segments
+For a lane that uses a waypoint, `distance_routed` and `duration_routed` equal the sum of the origin-to-waypoint and waypoint-to-destination segment values, and `detour_added` equals `distance_routed - distance_direct`. If either segment failed, `distance_routed` and `duration_routed` are NA and the lane carries an error.
+
+**Validates: Requirements 13.8, 13.9**
+
+### Property 6: Lane identity
+Two lanes that share an origin, destination and waypoint usage share a RouteId. Two lanes that differ only in waypoint usage have different RouteIds.
+
+**Validates: Requirements 9.4, 13.5**
+
+### Property 7: Each distinct segment is requested at most once
+Across the whole run, the number of provider routing requests is at most the number of distinct (from location, to location) segments, no matter how many lanes use a segment. The same holds for geocoding: at most one request per distinct location.
+
+**Validates: Requirements 13.11, 14.3**
+
+### Property 8: Repeat runs are free
+Running the same input a second time, with the cache intact, makes zero provider requests and returns identical results.
+
+**Validates: Requirements 14.4**
+
+### Property 9: Failures stay local
+A location that cannot be geocoded, or a segment that fails, changes only the lanes that depend on it. Every other lane's result is identical to what it would have been without the failure.
+
+**Validates: Requirements 14.5, 13.9**
+
+### Property 10: Bad arguments fail before any request
+Invalid combinations of the `Use_Waypoint` column and the `waypoint` argument raise an error before the first provider request or cache write.
+
+**Validates: Requirements 13.1**
+
+### Property 11: Direct and routed sanity check
+For a waypoint lane, `distance_routed` is never reported as more than 0.5% shorter than `distance_direct` without the lane being flagged.
+
+**Validates: Requirements 13.10**
+
+### Property 12: The key never leaks
+The API key never appears in any message, warning, error, cache file or returned value.
+
+**Validates: Requirements 7.5**
 
 ## Error Handling
 

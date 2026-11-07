@@ -13,6 +13,9 @@ fix.CTRY(ctry)
 A character vector of normalized country codes.
 }
 \description{
-Maps common 2-letter country codes to the 3-letter forms expected downstream
-(US -> USA, MX -> MEX, CA -> CAN).
+Maps common country codes and spellings to the 3-letter forms expected
+downstream (US, U.S., USA -> USA; MX, MEX, MEXICO -> MEX; CA, CAD, CAN,
+CANADA -> CAN). Input is upper-cased and periods and spaces are ignored, so
+"U.S." and "us" both map to USA. Values that match none of these are
+returned upper-cased.
 }

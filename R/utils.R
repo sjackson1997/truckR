@@ -25,16 +25,20 @@ fix.ZIP <- function(zip) {
 
 #' Normalize country codes
 #'
-#' Maps common 2-letter country codes to the 3-letter forms expected downstream
-#' (US -> USA, MX -> MEX, CA -> CAN).
+#' Maps common country codes and spellings to the 3-letter forms expected
+#' downstream (US, U.S., USA -> USA; MX, MEX, MEXICO -> MEX; CA, CAD, CAN,
+#' CANADA -> CAN). Input is upper-cased and periods and spaces are ignored, so
+#' "U.S." and "us" both map to USA. Values that match none of these are
+#' returned upper-cased.
 #'
 #' @param ctry A character vector of country codes.
 #' @return A character vector of normalized country codes.
 #' @export
 fix.CTRY <- function(ctry) {
+  ctry <- stringr::str_to_upper(stringr::str_remove_all(ctry, "[.\\s]"))
   ctry <- dplyr::case_when(
     stringr::str_detect(ctry, "US") ~ "USA",
-    stringr::str_detect(ctry, "MX") ~ "MEX",
+    stringr::str_detect(ctry, "MX|MEX") ~ "MEX",
     stringr::str_detect(ctry, "CA") ~ "CAN",
     TRUE ~ ctry
   )
