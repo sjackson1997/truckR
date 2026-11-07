@@ -98,7 +98,12 @@ A provider is a named list of functions, registered with `register_provider()` (
 | `geocode(location)` | takes a location as a list of whatever components exist (street address, zip, city, state, country) and chooses its own strategy; returns `lon`, `lat`, match layer, error |
 | `route_segment(from, to)` | one pair of coordinates to `distance_m`, `duration_s`, error |
 | `validate_credentials()` | TRUE/FALSE or an error with guidance |
-| `limits` | requests per minute used for throttling |
+| `limits` (optional) | a list with `requests_per_minute`, used for throttling |
+| `profile` (optional) | a string naming the routing profile (for example `"driving-hgv"`); part of the cache key |
+
+Registration is checked (`register_provider()`): the three functions must exist and accept at least 1, 2 and 0 arguments (or `...`), `limits$requests_per_minute` must be a positive number, `profile` a non-empty string, and the name a lower-case string of letters, digits and underscores. A bad provider is rejected with a message naming the problem, so mistakes show up at registration, not mid-run. Registering an existing name is an error unless `overwrite = TRUE`. The registry and the active provider are kept in a package-level environment for the session. `truckr_get_provider()` returns the active name or `NULL`; the internal `resolve_provider()` (used by `route()`) turns a missing provider into the "No routing provider is configured" error (Requirement 1.4). No provider is chosen automatically, even when only one is registered.
+
+Credentials: the key for provider `x` is read from `TRUCKR_X_API_KEY` (Requirement 7.1) by an internal `get_api_key()` at call time; if it is missing, the error names the variable and explains `.Renviron` and `Sys.setenv()` (7.3). `truckr_has_key()` reports TRUE/FALSE only (7.4). An internal `redact_key()` replaces any occurrence of the key in text with "[API key removed]"; the HTTP layer (Task 8) must pass every error message and URL through it before showing or storing it (7.5, Property 12).
 
 Unit conversion to miles and hours is done once, centrally, after the provider returns meters and seconds, so providers never convert (Requirement 1.3).
 

@@ -45,7 +45,7 @@ Working rules for every task:
   - Done when: segment counts match hand-calculated expectations in all synthetic cases.
   - _Requirements: 13.3, 13.9, 13.11, 14.3_
 
-- [ ] 5. Implement the provider registry and credential helpers
+- [x] 5. Implement the provider registry and credential helpers
   - `register_provider()` validating the interface (`geocode`, `route_segment`, `validate_credentials`, `limits`); minimal `truckr_set_provider()`, `truckr_get_provider()`, `truckr_list_providers()`; stop with a clear message when no provider is configured or an unregistered name is requested.
   - `truckr_has_key(provider)` reading `TRUCKR_{PROVIDER}_API_KEY`; internal key getter that stops with a clear message naming the missing variable and how to set it, and never echoes the key.
   - Tests with a fake provider (no network), including rejection of providers missing a required function.
