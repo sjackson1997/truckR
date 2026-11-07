@@ -24,7 +24,7 @@ The truckR package currently supports only the PC Miler API for transportation r
 
 1. THE Router SHALL expose a single `route()` function that accepts a Route_Request and returns a Route_Result regardless of which Provider is active
 2. WHEN a Provider is registered, THE Router SHALL validate that the Provider implements all required interface functions (route single, route batch, and validate credentials)
-3. THE Router SHALL return Route_Result data frames with a consistent schema containing at minimum: RouteId, origin address fields, destination address fields, distance_miles, duration_hours, and provider_name
+3. THE Router SHALL return Route_Result data frames with a consistent schema containing at minimum: RouteId, origin address fields, destination address fields, the always-present distance, duration and waypoint-flag columns defined in Requirement 13 criterion 6 (`distance_direct`, `distance_routed`, `duration_direct`, `duration_routed`, `has_waypoint`), error fields, and `provider_name`. Distances SHALL be expressed in miles and durations in hours, regardless of the units a Provider returns.
 4. WHEN a user calls `route()` without configuring a Provider, THE Router SHALL stop with a clear error message indicating no Provider is configured
 5. THE Router SHALL support registering custom Provider implementations at runtime via a `register_provider()` function
 
@@ -163,7 +163,13 @@ The truckR package currently supports only the PC Miler API for transportation r
 
 #### Acceptance Criteria
 
-1. THE Router SHALL support an optional per-route intermediate waypoint, enabled by a logical column in the input data frame (e.g. `Use_Waypoint` = TRUE/FALSE). Rows where the flag is absent or FALSE SHALL be routed directly origin-to-destination.
+1. THE Router SHALL support an optional per-route intermediate waypoint, enabled by an OPTIONAL logical column in the input data frame named `Use_Waypoint`. The column MAY be omitted entirely. Rows where the flag is FALSE or NA SHALL be routed directly origin-to-destination. The rules for combining the column with the `waypoint` parameter are:
+   - column absent and `waypoint` NULL: no waypoint processing; all lanes are routed directly;
+   - column present and `waypoint` supplied: lanes with TRUE use the waypoint;
+   - column present with any TRUE but `waypoint` NULL: stop with a clear error;
+   - column present with no TRUE and `waypoint` NULL: all lanes are routed directly (no error);
+   - column absent but `waypoint` supplied: stop with a clear error asking the caller to add `Use_Waypoint`, so a waypoint is never silently applied to every lane;
+   - column present but not logical: stop with a clear error.
 2. THE Router SHALL accept the waypoint location as a function parameter supplied by the caller (not required to be a column), specified flexibly as any of: a postal/zip code, a city/state, a full street address, or latitude/longitude coordinates.
 3. WHERE a provider requires coordinate inputs (e.g. OSRM, OpenRouteService), THE Router SHALL geocode a non-coordinate waypoint to coordinates before requesting the route, using the same geocoding path as origin/destination addresses.
 4. THE Router SHALL support at most ONE intermediate waypoint per route. Multiple intermediate stops are explicitly out of scope.
@@ -171,15 +177,35 @@ The truckR package currently supports only the PC Miler API for transportation r
 6. THE Route_Result SHALL ALWAYS include the following columns, populated for EVERY lane regardless of whether any lane uses a waypoint, so downstream analysis and filtering can reference them consistently:
    - `distance_direct`: the shortest origin-to-destination distance with no waypoint,
    - `distance_routed`: the distance as specified by the user. For a lane that uses a waypoint, this is the full origin-to-waypoint-to-destination distance. For a lane that does not use a waypoint, it equals `distance_direct`. (Working name; see Note C.)
+   - `duration_direct`: the driving time in hours for the shortest origin-to-destination route with no waypoint,
+   - `duration_routed`: the driving time in hours for the route as specified by the user (the sum of the two segment durations when a waypoint is used, otherwise equal to `duration_direct`),
    - `has_waypoint` (logical): TRUE if the lane was routed through a waypoint, FALSE otherwise, for quick filtering.
-7. WHEN no route in the input uses a waypoint, THE Route_Result SHALL contain NO waypoint-related columns beyond the three in criterion 6.
-8. WHEN at least one route in the input uses a waypoint, THE Route_Result SHALL retain all standard columns, including the three in criterion 6, and additionally include the columns below. For lanes that did NOT use a waypoint, every one of these additional columns SHALL be NA:
+7. WHEN no route in the input uses a waypoint, THE Route_Result SHALL contain NO waypoint-related columns beyond the five in criterion 6.
+8. WHEN at least one route in the input uses a waypoint, THE Route_Result SHALL retain all standard columns, including the five in criterion 6, and additionally include the columns below. For lanes that did NOT use a waypoint, every one of these additional columns SHALL be NA:
    - the waypoint value that was used and its type (zip, city/state, address, or coordinates),
-   - `detour_added` (numeric): the additional distance the waypoint adds versus the direct route (`distance_routed - distance_direct`).
-9. THE Router SHALL treat a waypoint lane as two ordinary point-to-point segments, origin-to-waypoint and waypoint-to-destination, and SHALL compute `distance_routed` as the sum of those two segment distances. This keeps every Provider limited to simple point-to-point routing, so waypoint support is never required of a Provider. Per-segment distances are internal and SHALL NOT appear in the Route_Result.
+   - `detour_added` (numeric): the additional distance in miles the waypoint adds versus the direct route (`distance_routed - distance_direct`),
+   - `detour_duration_added` (numeric): the additional driving time in hours (`duration_routed - duration_direct`).
+9. THE Router SHALL treat a waypoint lane as two ordinary point-to-point segments, origin-to-waypoint and waypoint-to-destination, and SHALL compute `distance_routed` and `duration_routed` as the sums of the two segment distances and durations. This keeps every Provider limited to simple point-to-point routing, so waypoint support is never required of a Provider. Per-segment distances are internal and SHALL NOT appear in the Route_Result.
    - IF either segment fails or returns an error, THEN `distance_routed` SHALL be NA for that lane and the error detail SHALL be included in the lane's error fields.
-10. FOR each lane that uses a waypoint, THE Router SHALL verify that `distance_routed` is not shorter than `distance_direct` (within a 0.5% tolerance), and SHALL surface a warning or error field when it is, since this indicates a likely mis-geocoded or invalid waypoint.
+10. FOR each lane that uses a waypoint, THE Router SHALL verify that neither `distance_routed` nor `duration_routed` is shorter than its direct counterpart (within a 0.5% tolerance), and SHALL surface a warning or error field when it is, since this indicates a likely mis-geocoded or invalid waypoint.
 11. BEFORE submission to a Provider, THE Column_Mapper SHALL expand all lanes (direct lanes, the direct segment of each waypoint lane, and both waypoint segments) into a single pool of point-to-point segments and de-duplicate that pool by origin and destination location, so each distinct segment (e.g. "Mexico City to Laredo, TX") is submitted exactly once regardless of how many lanes use it. Results SHALL then be mapped back to every originating lane to populate `distance_direct` and `distance_routed`.
+
+### Requirement 14: Geocoding and Location Caching
+
+**User Story:** As a developer using coordinate-based providers on rate-limited free tiers, I want locations geocoded once and reused, so that I conserve API quota and get consistent coordinates across lanes, segments and waypoints.
+
+#### Acceptance Criteria
+
+1. THE Geocoder SHALL convert an origin, destination or waypoint specified as a postal code, city/state, full street address, or coordinates into latitude/longitude, passing coordinates through unchanged without an API call.
+2. THE Geocoder SHALL restrict each lookup to the location's country when a country is known, to avoid matching a same-named place in another country.
+3. THE Geocoder SHALL de-duplicate locations before any API call, so each distinct location is geocoded at most once per run.
+4. THE Geocoder SHALL cache results for the session and SHALL support an optional persistent on-disk cache in a user-level cache directory, never in the package source or the working project.
+5. WHEN a location cannot be geocoded, THE Geocoder SHALL record the failure for that location only, and every lane or segment depending on that location SHALL be returned with NA distances and a descriptive error rather than stopping the whole run.
+6. THE Geocoder SHALL record the match confidence or match type returned by the geocoding service and SHALL flag low-confidence matches in the Route_Result so they can be reviewed.
+7. THE Geocoder SHALL be implemented per Provider (each Provider supplies its own geocoding function) so that a Provider without geocoding can delegate to another.
+8. THE Router SHALL pass each Provider every available component of a location (street address, postal code, city, state, country), allowing any component to be missing, including the street address, which is expected to be present only occasionally, and the Provider SHALL choose its own geocoding strategy from them. The package SHALL NOT assume one strategy (such as city/state or postal code) works for all Providers.
+9. WHERE a street address is present for a location, THE Provider SHALL attempt to geocode using it first. IF the street address cannot be matched, THEN the Provider MAY fall back to a coarser lookup from the remaining components, but SHALL flag the location in `geocode_flag` as having used the coarser fallback, so lanes with reduced precision are identifiable. The street address SHALL be part of the location's de-duplication key, so two different addresses in the same city are not collapsed into one location.
+10. WHEN a Provider cannot reliably geocode a location from the components supplied (for example a postal-code-only location in a country the Provider handles poorly), THE Provider SHALL return a failed location with an explanatory reason rather than falling back to a loose search that could return a wrong place.
 
 ## Implementation Notes
 
@@ -204,3 +230,14 @@ The current `pcm_prep_dataframe()` function conflates two provider-agnostic conc
 ### Note C: Naming of the "as-specified" distance column
 
 The column holding the distance as the user specified the lane (via the waypoint when one is used, direct otherwise) is provisionally named `distance_routed`, paired with `distance_direct`. Other candidates considered: `distance_spec`, `distance_used`, `distance_final`. The name is a working choice and can be changed before implementation; the requirement is that the column exists, is always populated, and is the single column downstream analysis references.
+
+### Note D: Delivery phases
+
+The requirements above are too large to build at once. They are delivered in phases, each independently useful:
+
+- **Phase 1 (first design and build):** Requirement 1 (core Router), Requirement 6 (OpenRouteService provider), the key-reading parts of Requirement 7 (7.1, 7.3, 7.4), Requirement 9 (column mapping and de-duplication), Requirement 13 (waypoints and segment expansion), Requirement 14 (geocoding and caching), and the minimum rate-limit handling in 6.5.
+- **Phase 2:** the rest of Requirements 7, 8, 11 and 12 (key helpers and keyring, provider selection, retry and backoff, batch progress).
+- **Phase 3:** additional providers: Requirements 5 (OSRM), 3 (Google Maps), 4 (HERE).
+- **Phase 4:** Requirement 10 (CRAN readiness), including documenting the older functions and datasets.
+
+Requirement 2 (PC Miler) is not scheduled; see Note A.
