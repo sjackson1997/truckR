@@ -15,15 +15,15 @@ Working rules for every task:
 
 ## Tasks
 
-- [ ] 1. Set up testing and fix package dependencies
+- [x] 1. Set up testing and fix package dependencies
   - Run `usethis::use_testthat(edition = 3)`; add `testthat (>= 3.0.0)` to Suggests.
   - Add `rlang` to Imports (it is already used by `pcm_prep_dataframe()`), clearing the "import not declared" check warning.
   - Add a trivial passing test to confirm the harness runs; run `devtools::test()` and `devtools::check()`.
-  - Update `renv` with `renv::snapshot()`.
+  - Update `renv` with `renv::snapshot(dev = TRUE)` so `testthat` (a Suggests package) is locked too; a plain `renv::snapshot()` skips Suggests in this project.
   - Done when: tests run, the `rlang` warning is gone, and renv reports no issues.
   - _Requirements: 10.2_
 
-- [ ] 2. Implement `resolve_waypoint_mode()` (argument validation)
+- [x] 2. Implement `resolve_waypoint_mode()` (argument validation)
   - Internal function taking `df` and `waypoint`; returns a normalized list: which rows use a waypoint (logical vector, NA treated as FALSE) and the parsed waypoint (type: zip, city/state, address or coordinates).
   - Implement every row of the table in the design: absent/NULL, present with TRUE, TRUE with no waypoint (error), no TRUE with no waypoint (all direct), absent column with a waypoint (error asking for `Use_Waypoint`), non-logical column (error).
   - Tests for each case, including NA handling and error messages.
@@ -119,7 +119,7 @@ Working rules for every task:
   - Add a short `README` section showing key setup (`.Renviron`), a basic `route()` call, and a waypoint example.
   - Run `devtools::document()` and `devtools::check()`; confirm no new warnings or notes.
   - Update `TODO_package_plan.md` to remove the items that are now done and reflect the new priorities.
-  - Rebuild and reinstall into the global library so `library(truckR)` has the new functions; run `renv::snapshot()`.
+  - Rebuild and reinstall into the global library so `library(truckR)` has the new functions; run `renv::snapshot(dev = TRUE)`.
   - Done when: the check is clean apart from the known Phase 4 documentation warnings and a fresh R session can call `route()` on a small example.
   - _Requirements: 10.1, 10.4, 10.5, 10.6_
 
@@ -132,3 +132,38 @@ Working rules for every task:
 ## Not in Phase 1
 
 Credential-setting helpers and keyring support, provider options beyond defaults, full retry and batch configuration, the OSRM, Google and HERE providers, the PC Miler provider refactor, and the remaining CRAN readiness work are Phases 2 to 4 (Note D).
+
+## Task Dependency Graph
+
+An arrow means "must be finished before". Tasks with no arrow between them can be done in any order.
+
+```mermaid
+flowchart LR
+    T1[1 Testing setup] --> T2[2 Waypoint mode]
+    T1 --> T3[3 prep_lanes]
+    T1 --> T5[5 Provider registry]
+    T3 --> T4[4 build_segments]
+    T4 --> T6[6 assemble_results]
+    T5 --> T7[7 Cache]
+    T5 --> T8[8 ORS HTTP layer]
+    T8 --> T9[9 ORS route_segment]
+    T8 --> T10[10 ORS geocode]
+    T7 --> T10
+    T7 --> T11[11 Quota pre-flight]
+    T9 --> T11
+    T2 --> T12[12 route]
+    T6 --> T12
+    T10 --> T12
+    T11 --> T12
+    T12 --> T13[13 Live verification]
+    T13 --> T14[14 Docs and release]
+```
+
+Notes on the graph: Tasks 2, 3 and 5 can start in any order once Task 1 is done. Tasks 1 to 6 need no network or API quota. The first live API calls are in Task 9.
+
+## Notes
+
+- **Status convention:** a task is marked `[x]` only when its "Done when" condition has been met and the work is committed on the `phase1-routing` branch.
+- **renv and dev dependencies:** this project's renv ignores Suggests by default. Always snapshot with `renv::snapshot(dev = TRUE)` or `testthat` will drop out of `renv.lock`. `devtools` and `roxygen2` are developer tools and are intentionally not locked; install them separately when developing.
+- **Live quota:** the ORS free quota (about 200 directions and 100 geocoding requests per 24 hours) is shared by all live tasks. Check the remaining quota before each live task (9, 10 and 13) and prefer saved fixtures over repeat calls.
+- **Spec changes during build:** when a task reveals something that changes the design (a live finding, a decision), update `design.md` or `requirements.md` in the same commit as the code so the documents never drift from the implementation.

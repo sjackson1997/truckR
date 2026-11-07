@@ -40,8 +40,11 @@ route(df, waypoint = NULL, provider = truckr_get_provider(), ...)
 | present, has TRUE | supplied | TRUE lanes use the waypoint |
 | present, has TRUE | NULL | error |
 | present, no TRUE | NULL | all lanes direct, no error |
+| present, no TRUE | supplied | all lanes direct, with a warning that the waypoint was not used |
 | absent | supplied | error: add a `Use_Waypoint` column |
 | present, not logical | any | error |
+
+`resolve_waypoint_mode()` returns `mode` ("none" or "waypoint"), `use_waypoint` (a logical vector, one per row) and `waypoint` (NULL, or the parsed location). The parsed waypoint carries its `type` (`coordinates`, `address`, `zip` or `city_state`), a display `value`, and the components `street`, `city`, `state`, `zip`, `country`, `lat`, `lon`, so providers can apply their own geocoding strategy (Requirement 14.8). A bare string is classified automatically (five-digit or ZIP+4 and Canadian postal codes as `zip`; "City, ST" as `city_state`; anything else as a free-text `address`); coordinates must be named `lat` and `lon`; a named list or vector of components is also accepted, which is how to state a country explicitly. When the country is not supplied it is inferred only where unambiguous (US five-digit zips and US states as USA, Canadian postal codes and provinces as CAN) and flagged as `country_inferred`; a Mexican waypoint needs `country` stated explicitly.
 
 NA in `Use_Waypoint` is treated as FALSE. The "absent but waypoint supplied" case is an error on purpose: silently applying a waypoint to every lane is easy to do by accident and hard to spot in the output.
 - Returns the Route_Result (below).

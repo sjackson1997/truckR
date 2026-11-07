@@ -168,6 +168,7 @@ The truckR package currently supports only the PC Miler API for transportation r
    - column present and `waypoint` supplied: lanes with TRUE use the waypoint;
    - column present with any TRUE but `waypoint` NULL: stop with a clear error;
    - column present with no TRUE and `waypoint` NULL: all lanes are routed directly (no error);
+   - column present with no TRUE but `waypoint` supplied: all lanes are routed directly, with a warning that the waypoint was not used because no lane is flagged;
    - column absent but `waypoint` supplied: stop with a clear error asking the caller to add `Use_Waypoint`, so a waypoint is never silently applied to every lane;
    - column present but not logical: stop with a clear error.
 2. THE Router SHALL accept the waypoint location as a function parameter supplied by the caller (not required to be a column), specified flexibly as any of: a postal/zip code, a city/state, a full street address, or latitude/longitude coordinates.
