@@ -159,10 +159,28 @@ flowchart LR
     T13 --> T14[14 Docs and release]
 ```
 
+The same dependencies as waves. Waves run in order; tasks inside a wave do not depend on each other:
+
+```json
+{
+  "waves": [
+    { "id": 1, "tasks": ["1"] },
+    { "id": 2, "tasks": ["2", "3", "5"] },
+    { "id": 3, "tasks": ["4", "7", "8"] },
+    { "id": 4, "tasks": ["6", "9", "10"] },
+    { "id": 5, "tasks": ["11"] },
+    { "id": 6, "tasks": ["12"] },
+    { "id": 7, "tasks": ["13"] },
+    { "id": 8, "tasks": ["14"] }
+  ]
+}
+```
+
 Notes on the graph: Tasks 2, 3 and 5 can start in any order once Task 1 is done. Tasks 1 to 6 need no network or API quota. The first live API calls are in Task 9.
 
 ## Notes
 
+- **Waves are about dependencies only:** the waves above describe what is technically possible in parallel. They do not replace the review checkpoints below or the live-quota rules, so tasks are still done one at a time, and the live tasks (9, 10 and 13) should never run at the same time because they share one daily quota.
 - **Status convention:** a task is marked `[x]` only when its "Done when" condition has been met and the work is committed on the `phase1-routing` branch.
 - **renv and dev dependencies:** this project's renv ignores Suggests by default. Always snapshot with `renv::snapshot(dev = TRUE)` or `testthat` will drop out of `renv.lock`. `devtools` and `roxygen2` are developer tools and are intentionally not locked; install them separately when developing.
 - **Live quota:** the ORS free quota (about 200 directions and 100 geocoding requests per 24 hours) is shared by all live tasks. Check the remaining quota before each live task (9, 10 and 13) and prefer saved fixtures over repeat calls.
