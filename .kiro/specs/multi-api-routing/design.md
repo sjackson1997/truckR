@@ -68,7 +68,16 @@ Expands every lane into point-to-point segments and de-duplicates the pool by or
 | No waypoint | direct (origin to destination) |
 | Waypoint | direct (origin to destination), origin to waypoint, waypoint to destination |
 
-The result is a segments table: `SegmentId`, `from_key`, `to_key`. Each lane keeps a mapping to its segment ids (`direct_seg`, and `leg1_seg`/`leg2_seg` for waypoint lanes). A location's `key` is a normalized string (for example `"78040|US"`), so the same place written two ways still de-duplicates once normalized.
+`build_segments()` returns four things:
+
+- `segments`: `SegmentId` (`SEG-0001`, numbered in order of first appearance, lane by lane, direct segment first), `from_key`, `to_key`.
+- `locations`: one row per distinct location used, with `location_key` and its components (`street`, `city`, `state`, `zip`, `country`, `lat`, `lon`). This is what the geocoder receives.
+- `lane_segments`: one row per `RouteId` with `direct_seg`, `leg1_seg` and `leg2_seg` (NA where not applicable, and NA for lanes flagged in `lane_error`).
+- `waypoint_key`: the key of the waypoint location, or NA.
+
+A location's key is built from all five components (`street|city|state|zip|country`), upper-cased with spaces squeezed, for example `"|LAREDO|TX|78040|USA"` (empty street) or `"|||78040|USA"` (zip and country only), with unknown parts left blank; a coordinate location is keyed `COORD|lat|lon` rounded to five decimals. Because every component is in the key, the same place written with different capitalization is one location, two street addresses in one city are two, and a location known only by zip is different from the same zip with a city (they may geocode differently, so they are looked up separately).
+
+Segments are directional: A to B and B to A are separate segments, since routes can differ. Treating them as one would save requests on quota-limited providers and is a possible later optimization, but it is not done in Phase 1. A segment whose start and end are the same location is not special-cased yet.
 
 Example: 25 lanes from Mexico City that all pass through Laredo produce one "Mexico City to Laredo" segment, not 25.
 

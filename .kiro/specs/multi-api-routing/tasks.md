@@ -38,7 +38,7 @@ Working rules for every task:
   - Done when: tests pass and the function returns the same lane count as the measured samples (74 distinct lanes in `df_route_samples`).
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 13.5_
 
-- [ ] 4. Implement location keys and `build_segments()` (expansion and de-duplication)
+- [x] 4. Implement location keys and `build_segments()` (expansion and de-duplication)
   - Internal location key builder: normalized string from all available components (street address, zip, city, state, country) so the same place written two ways de-duplicates, while two street addresses in one city stay distinct.
   - `build_segments()` expands lanes into point-to-point segments: direct only for non-waypoint lanes; direct plus origin-to-waypoint plus waypoint-to-destination for waypoint lanes. De-duplicate the pool by from/to location key and keep a mapping from each lane to its segment ids.
   - Synthetic tests: 25 lanes from one Mexican origin through one Laredo waypoint to different California destinations must produce exactly one "origin to Laredo" segment; two lanes sharing an origin and destination produce one direct segment; mixed waypoint and non-waypoint lanes share a direct segment where applicable.
