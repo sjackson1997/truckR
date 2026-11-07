@@ -57,6 +57,7 @@ Working rules for every task:
   - `assemble_results()` maps segment results back to lanes and builds `distance_direct`, `distance_routed`, `duration_direct`, `duration_routed`, `has_waypoint`, `provider_name`, `route_error` and `geocode_flag`; routed values are the sum of the two legs for waypoint lanes and equal to the direct values otherwise; NA with an error message if either leg failed.
   - Add the waypoint-only columns (`waypoint_value`, `waypoint_type`, `detour_added`, `detour_duration_added`) only when at least one lane uses a waypoint, NA for other lanes; add no extra columns otherwise.
   - Sanity check: flag lanes where routed is shorter than direct beyond 0.5% in distance or duration.
+  - Same-place lanes (Requirement 9.6): a lane flagged "same origin and destination" in `lane_error` gets NA distances and durations and that text in `route_error`. A same-place lane that uses a waypoint gets `distance_routed`/`duration_routed` from its two legs, NA for `distance_direct`/`duration_direct` and for the detour columns, and a `route_error` note saying the direct distance does not apply. A segment with `same_place` TRUE has distance and duration 0 without any request.
   - Join back to the original rows so row count and order match the input.
   - Tests with hand-built segment results, covering: no waypoints, mixed lanes, a failed leg, a failed direct segment, the sanity-check trigger, and row order preservation.
   - Done when: all cases pass and the always-present columns exist in every case.
@@ -97,6 +98,7 @@ Working rules for every task:
   - Before routing, count the segments that are not already cached and compare against the remaining quota (from the last seen headers, or a conservative default); report the numbers up front with `message()`.
   - If the run exceeds the quota, route as many segments as fit, cache them, stop cleanly, and return the remaining lanes with `route_error = "quota exhausted; re-run after reset"` so a later re-run completes the job.
   - Tests with a fake provider that reports a small quota: the run stops at the limit, results are cached, and a second run finishes only the remaining segments.
+  - Segments with `same_place` TRUE are excluded from the request count and are never sent to a provider (Requirement 9.6).
   - Done when: the stop-and-resume behavior is verified offline.
   - _Requirements: 6.5, 11.2, 12.2, 12.3, 12.4_
 

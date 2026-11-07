@@ -268,3 +268,71 @@ test_that("zero lanes give empty results", {
   expect_equal(nrow(res$locations), 0)
   expect_equal(nrow(res$lane_segments), 0)
 })
+
+# --- Same origin and destination -------------------------------------------------------
+
+same_place <- function() {
+  # Origin and destination are both Mexico City.
+  data.frame(
+    orig_city = "MEXICO CITY", orig_state = "DF", orig_zip = "06600", orig_ctry = "MX",
+    dest_city = "MEXICO CITY", dest_state = "DF", dest_zip = "06600", dest_ctry = "MX",
+    stringsAsFactors = FALSE
+  )
+}
+
+test_that("a same-place lane without a waypoint produces no segments", {
+  res <- pipeline(same_place())
+
+  expect_equal(nrow(res$segments), 0)
+  expect_equal(nrow(res$locations), 0)
+  expect_true(is.na(res$lane_segments$direct_seg))
+})
+
+test_that("a same-place lane does not disturb the other lanes", {
+  df <- rbind(same_place(), mx_la())
+
+  res <- pipeline(df)
+
+  expect_equal(nrow(res$segments), 1)
+  expect_true(is.na(res$lane_segments$direct_seg[1]))
+  expect_false(is.na(res$lane_segments$direct_seg[2]))
+})
+
+test_that("a same-place lane with a waypoint gets its two legs but no direct segment", {
+  df <- same_place()
+  df$Use_Waypoint <- TRUE
+
+  res <- pipeline(df, waypoint = "78040")
+  ls <- res$lane_segments
+
+  expect_true(is.na(ls$direct_seg))
+  expect_false(is.na(ls$leg1_seg))
+  expect_false(is.na(ls$leg2_seg))
+  # Mexico City -> Laredo and Laredo -> Mexico City
+  expect_equal(nrow(res$segments), 2)
+  expect_equal(nrow(res$locations), 2)
+  expect_false(any(res$segments$same_place))
+  expect_equal(res$segments$from_key[1], res$segments$to_key[2])
+})
+
+test_that("a waypoint equal to the origin gives a zero-length leg that is marked", {
+  df <- mx_la()
+  df$Use_Waypoint <- TRUE
+
+  # The waypoint is Mexico City itself, the lane's origin.
+  res <- pipeline(df, waypoint = list(city = "Mexico City", state = "DF", zip = "06600", country = "MX"))
+  leg1 <- res$segments[res$segments$SegmentId == res$lane_segments$leg1_seg, ]
+  leg2 <- res$segments[res$segments$SegmentId == res$lane_segments$leg2_seg, ]
+
+  expect_true(leg1$same_place)
+  expect_false(leg2$same_place)
+})
+
+test_that("ordinary segments are never marked as same place", {
+  df <- rbind(mx_la(), mx_la(dest_zip = "92101"))
+  df$Use_Waypoint <- c(TRUE, FALSE)
+
+  res <- pipeline(df, waypoint = "78040")
+
+  expect_false(any(res$segments$same_place))
+})

@@ -56,7 +56,15 @@ location_key <- function(x) {
 #' A are separate segments, because the routes can differ.
 #'
 #' Lanes that \code{prep_lanes()} flagged in \code{lane_error} get no segments
-#' (their segment ids are \code{NA}) and do not contribute locations.
+#' (their segment ids are \code{NA}) and do not contribute locations. That
+#' includes lanes whose origin and destination are the same place and which have
+#' no waypoint. A same-place lane that does use a waypoint gets its two legs but
+#' no direct segment (\code{direct_seg} is \code{NA}).
+#'
+#' The \code{same_place} column of \code{segments} is \code{TRUE} for a segment
+#' whose start and end are the same location, which can only happen for a leg
+#' when the waypoint equals the origin or destination. Such a segment has zero
+#' length and must not be sent to a provider.
 #'
 #' @param lanes The \code{lanes} or \code{unique_lanes} table from
 #'   \code{prep_lanes()}. Lanes sharing a \code{RouteId} are treated as one.
@@ -66,7 +74,8 @@ location_key <- function(x) {
 #' @return A list with:
 #' \itemize{
 #'   \item \code{segments}: \code{SegmentId}, \code{from_key}, \code{to_key},
-#'     one row per distinct segment, numbered in order of first appearance;
+#'     \code{same_place}, one row per distinct segment, numbered in order of
+#'     first appearance;
 #'   \item \code{locations}: \code{location_key} and the components
 #'     \code{street}, \code{city}, \code{state}, \code{zip}, \code{country},
 #'     \code{lat}, \code{lon}, one row per distinct location used by a segment;
@@ -78,7 +87,7 @@ location_key <- function(x) {
 #' @noRd
 build_segments <- function(lanes, waypoint = NULL) {
   comps <- c("street", "city", "state", "zip", "country")
-  needed <- c("RouteId", "use_waypoint", "lane_error",
+  needed <- c("RouteId", "use_waypoint", "same_od", "lane_error",
               paste0("orig_", comps), paste0("dest_", comps))
   missing_cols <- setdiff(needed, names(lanes))
   if (length(missing_cols) > 0) {
@@ -125,7 +134,9 @@ build_segments <- function(lanes, waypoint = NULL) {
       stringsAsFactors = FALSE
     )
   }
-  direct_rows <- which(ok)
+  # A lane whose origin and destination are the same place never gets a direct
+  # segment (nothing to route). If it uses a waypoint, its two legs are still built.
+  direct_rows <- which(ok & !lanes$same_od)
   wp_rows <- which(uses_waypoint)
   candidates <- rbind(
     pieces("direct", direct_rows, origin_key[direct_rows], dest_key[direct_rows]),
@@ -148,7 +159,8 @@ build_segments <- function(lanes, waypoint = NULL) {
   segments <- dplyr::tibble(
     SegmentId = seg_id[first],
     from_key = candidates$from_key[first],
-    to_key = candidates$to_key[first]
+    to_key = candidates$to_key[first],
+    same_place = candidates$from_key[first] == candidates$to_key[first]
   )
 
   lane_segments <- dplyr::tibble(

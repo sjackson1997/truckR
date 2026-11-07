@@ -121,6 +121,7 @@ The truckR package currently supports only the PC Miler API for transportation r
 3. WHEN required address columns cannot be matched, THE Column_Mapper SHALL stop with a clear error listing which components could not be found
 4. THE Column_Mapper SHALL assign a unique RouteId to each distinct origin-destination pair and de-duplicate before sending to the Provider
 5. THE Column_Mapper SHALL support an optional street address component for providers that accept full addresses
+6. WHEN a lane's origin and destination are the same location, THE Router SHALL NOT submit a request to a Provider for the direct origin-to-destination route, and SHALL flag the lane with the error "same origin and destination". IF that lane uses an intermediate waypoint (Requirement 13), THEN the Router SHALL still route it out to the waypoint and back, SHALL NOT request the direct segment, and SHALL flag the lane to note that the direct distance does not apply. A segment whose start and end are the same location SHALL never be sent to a Provider.
 
 ### Requirement 10: CRAN Readiness
 

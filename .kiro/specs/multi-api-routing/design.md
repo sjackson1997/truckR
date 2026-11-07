@@ -57,6 +57,7 @@ Generalizes the useful part of `pcm_prep_dataframe()`:
 - Normalizes with the existing `fix.ZIP()` and `fix.CTRY()` (countries become `USA`, `MEX` or `CAN`; `fix.CTRY()` was extended to handle "U.S." and "Mexico"). Blank text becomes `NA`. Postal codes are normalized but not validated, so a malformed code such as a truncated `L8E` passes through; rejecting or flagging it is the geocoder's job (Requirement 14.5).
 - Assigns a lane-level `RouteId` per distinct combination of origin, destination **and waypoint usage** (13.5), ignoring letter case, numbered in order of first appearance, preserving the original row order and joining results back onto every original row.
 - A row with no street address, zip or city on one side is kept and flagged in `lane_error`, so only that lane is affected downstream (Property 9).
+- A row whose origin and destination are the same location gets `same_od = TRUE`, and without a waypoint is flagged "same origin and destination" (Requirement 9.6, Property 13).
 - Returns `lanes` (one row per input row, standardized `orig_*`/`dest_*` component columns), `unique_lanes` (one row per `RouteId` with a count), and the original column names used.
 
 ### 3. `build_segments()` (internal): expansion and de-duplication
@@ -77,7 +78,7 @@ Expands every lane into point-to-point segments and de-duplicates the pool by or
 
 A location's key is built from all five components (`street|city|state|zip|country`), upper-cased with spaces squeezed, for example `"|LAREDO|TX|78040|USA"` (empty street) or `"|||78040|USA"` (zip and country only), with unknown parts left blank; a coordinate location is keyed `COORD|lat|lon` rounded to five decimals. Because every component is in the key, the same place written with different capitalization is one location, two street addresses in one city are two, and a location known only by zip is different from the same zip with a city (they may geocode differently, so they are looked up separately).
 
-Segments are directional: A to B and B to A are separate segments, since routes can differ. Treating them as one would save requests on quota-limited providers and is a possible later optimization, but it is not done in Phase 1. A segment whose start and end are the same location is not special-cased yet.
+Segments are directional: A to B and B to A are separate segments, since routes can differ. Treating them as one would save requests on quota-limited providers and is a possible later optimization, but it is not done in Phase 1. **Same origin and destination (Requirement 9.6).** `prep_lanes()` marks a lane `same_od` when its normalized origin and destination keys are identical. Without a waypoint the lane is flagged in `lane_error` as "same origin and destination" and gets no segments, so no request is made for it. With a waypoint it is not an error: it gets its two legs (out to the waypoint and back) but no direct segment (`direct_seg` is NA). Separately, `segments` has a `same_place` column that is TRUE for a zero-length segment, which happens only when a waypoint equals the lane's origin or destination; the request layer never sends such segments, and result assembly treats their distance and duration as 0. Limitation: only locations that normalize to the identical key are detected, so the same place written two ways (zip in one column, city in the other) is not caught here; two points that geocode to nearly identical coordinates are a possible later check.
 
 Example: 25 lanes from Mexico City that all pass through Laredo produce one "Mexico City to Laredo" segment, not 25.
 
@@ -214,6 +215,11 @@ For a waypoint lane, `distance_routed` is never reported as more than 0.5% short
 The API key never appears in any message, warning, error, cache file or returned value.
 
 **Validates: Requirements 7.5**
+
+### Property 13: No self-routes
+No provider request is ever made for a route whose start and end are the same location. A lane with the same origin and destination and no waypoint is returned with NA distances and the error "same origin and destination". With a waypoint it is routed through the waypoint and back, and the direct segment is not requested.
+
+**Validates: Requirements 9.6**
 
 ## Error Handling
 

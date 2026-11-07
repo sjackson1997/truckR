@@ -242,3 +242,57 @@ test_that("it works together with resolve_waypoint_mode()", {
   expect_equal(res$lanes$use_waypoint, c(TRUE, FALSE, TRUE))
   expect_equal(nrow(res$unique_lanes), 3)
 })
+
+# --- Same origin and destination ----------------------------------------------------
+
+same_place_lanes <- function() {
+  df <- make_lanes()
+  df$dest_city[2] <- "mexico city"      # same place as the origin, different case
+  df$dest_state[2] <- "DF"
+  df$dest_zip[2] <- "06600"
+  df$dest_ctry[2] <- "MX"
+  df
+}
+
+test_that("a lane with identical origin and destination is flagged and marked", {
+  res <- prep_lanes(same_place_lanes())
+
+  expect_equal(res$lanes$same_od, c(FALSE, TRUE, FALSE))
+  expect_equal(res$lanes$lane_error, c(NA, "same origin and destination", NA))
+})
+
+test_that("with a waypoint, a same-place lane is marked but is not an error", {
+  res <- prep_lanes(same_place_lanes(), use_waypoint = c(FALSE, TRUE, FALSE))
+
+  expect_equal(res$lanes$same_od, c(FALSE, TRUE, FALSE))
+  expect_true(all(is.na(res$lanes$lane_error)))
+})
+
+test_that("origin and destination that differ in any component are not the same place", {
+  df <- make_lanes()
+  df$dest_city[2] <- "MEXICO CITY"
+  df$dest_state[2] <- "DF"
+  df$dest_zip[2] <- "06601"            # different zip
+  df$dest_ctry[2] <- "MX"
+
+  res <- prep_lanes(df)
+
+  expect_false(any(res$lanes$same_od))
+  expect_true(all(is.na(res$lanes$lane_error)))
+})
+
+test_that("an empty location is reported as empty, not as same origin and destination", {
+  df <- make_lanes()
+  df[1, c("orig_city", "orig_zip", "dest_city", "dest_zip")] <- NA
+
+  res <- prep_lanes(df)
+
+  expect_false(res$lanes$same_od[1])
+  expect_match(res$lanes$lane_error[1], "no street address, postal code or city")
+})
+
+test_that("the clean sample data has no same-place lanes", {
+  res <- prep_lanes(df_route_samples)
+
+  expect_false(any(res$lanes$same_od))
+})

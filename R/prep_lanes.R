@@ -25,6 +25,14 @@
 #' city is not an error here: it is kept and flagged in \code{lane_error} so
 #' that only that lane is affected downstream.
 #'
+#' A row whose origin and destination are the same location (identical after
+#' normalization) has \code{same_od} set to \code{TRUE}. Without a waypoint it
+#' is flagged in \code{lane_error} as "same origin and destination" and is never
+#' sent to a provider. With a waypoint it is not an error: the lane is routed
+#' out to the waypoint and back. Only locations that normalize to the identical
+#' key are detected; the same place written two different ways (for example a
+#' zip in one column and a city in the other) is not.
+#'
 #' @param df A data frame of lanes.
 #' @param use_waypoint A logical vector with one non-missing element per row of
 #'   \code{df} saying which lanes use a waypoint (as returned by
@@ -33,7 +41,7 @@
 #' @return A list with:
 #' \itemize{
 #'   \item \code{lanes}: one row per row of \code{df}, with \code{row_id},
-#'     \code{RouteId}, \code{lane_error}, \code{use_waypoint}, and the
+#'     \code{RouteId}, \code{lane_error}, \code{use_waypoint}, \code{same_od}, and the
 #'     normalized components \code{orig_street}, \code{orig_city},
 #'     \code{orig_state}, \code{orig_zip}, \code{orig_country} and the matching
 #'     \code{dest_*} columns;
@@ -72,6 +80,8 @@ prep_lanes <- function(df, use_waypoint = NULL) {
 
   o <- read_location(df, origin_cols)
   d <- read_location(df, dest_cols)
+  o_key <- location_key(o)
+  d_key <- location_key(d)
   names(o) <- paste0("orig_", names(o))
   names(d) <- paste0("dest_", names(d))
 
@@ -86,6 +96,11 @@ prep_lanes <- function(df, use_waypoint = NULL) {
   lane_error[o_empty & !d_empty] <- "origin has no street address, postal code or city"
   lane_error[!o_empty & d_empty] <- "destination has no street address, postal code or city"
   lane_error[o_empty & d_empty] <- "origin and destination have no street address, postal code or city"
+
+  # A route from a place to itself is not requested. Without a waypoint the lane
+  # is flagged; with a waypoint it is still routed out and back (see build_segments()).
+  same_od <- !o_empty & !d_empty & o_key == d_key
+  lane_error[same_od & !use_waypoint] <- "same origin and destination"
 
   key <- function(x) toupper(ifelse(is.na(x), "", x))
   lane_key <- do.call(
@@ -106,6 +121,7 @@ prep_lanes <- function(df, use_waypoint = NULL) {
     RouteId = route_id,
     lane_error = lane_error,
     use_waypoint = use_waypoint,
+    same_od = same_od,
     !!!o,
     !!!d
   )
