@@ -63,19 +63,22 @@ Working rules for every task:
   - Done when: all cases pass and the always-present columns exist in every case.
   - _Requirements: 1.3, 13.6, 13.7, 13.8, 13.9, 13.10_
 
-- [ ] 7. Implement the cache layer
-  - In-session cache plus optional on-disk cache under `tools::R_user_dir("truckR", "cache")`, for both geocode results and route-segment results.
-  - Keys include provider name, profile (for routes) and the exact location components used, so providers and strategies never mix. Failed lookups are cached too, with the failure reason, so they are not retried within a run.
-  - Helpers to inspect and clear the cache (`truckr_cache_info()`, `truckr_cache_clear()`).
-  - Tests using a temporary cache directory: hit, miss, persistence across a simulated new session, and key separation by provider.
-  - Done when: a second identical request is served without calling the provider function (verified with a counting fake provider).
-  - _Requirements: 14.3, 14.4, 14.5_
+- [x] 7. Implement the cache layer
+  - Two layers (design, Component 8): an in-memory session cache and a disk cache under `tools::R_user_dir("truckR", "cache")`, for both geocode results and route-segment results. Lookup order is memory, then disk, then the provider. The disk file is read into memory once per session; new answers go to memory at once and are written to disk every 25 new answers and when a run ends or stops early (`on.exit`), using a temporary file that is renamed so a crash cannot damage the cache. The disk layer can be switched off with a `cache` setting.
+  - Keys include provider name, profile (for routes) and the exact location components used, so providers and strategies never mix. No API key is ever stored.
+  - Each entry records when it was obtained. Entries older than 120 days (setting `max_age_days`, default 120) are treated as missing, requested again, replaced, and dropped from the file at the next write.
+  - Failures: temporary failures (network, timeout, 429, 5xx, quota exhausted, or any failure the provider does not mark `error_permanent`) are never stored. A failure marked permanent is remembered in memory only, for the current session, and never written to disk.
+  - Helpers to inspect and clear the cache (`truckr_cache_info()` reports path, entry counts, oldest entry, expired count and size; `truckr_cache_clear()` clears memory, disk or both, optionally for one provider).
+  - Tests using a temporary cache directory and a fake clock (no waiting): hit, miss, persistence across a simulated new session, key separation by provider, an entry 119 days old is used and one 121 days old is refreshed, expired entries are dropped on write, a temporary failure leaves no entry, a permanent failure stays in memory only, a run that stops early keeps what it obtained, and a corrupted cache file is ignored with a message and rebuilt.
+  - Done when: a second identical request is served without calling the provider function (verified with a counting fake provider) and every property listed above has a passing test.
+  - _Requirements: 14.3, 14.4, 14.5, 14.11, 14.12, 14.13_
 
 - [ ] 8. Implement the ORS HTTP layer
   - A single internal function (for example `ors_request()`) through which all ORS traffic passes, so tests can replace it with saved fixtures.
   - Reads the key from `TRUCKR_ORS_API_KEY` at call time; sends it in the `Authorization` header for directions and the `api_key` parameter for geocoding (as confirmed in the spike).
   - Reads `x-ratelimit-limit`, `x-ratelimit-remaining` and `x-ratelimit-reset` from responses and exposes them; retries HTTP 429 and 5xx with exponential backoff (default 3 attempts) with `message()` notices; does not retry other 4xx; spaces requests under a configurable requests-per-minute.
-  - Tests with a mocked `httr` layer: success, 429 then success, 5xx exhausting retries, 4xx not retried, missing key.
+  - Classify every failure as temporary or permanent so the cache can decide what to keep (Requirement 14.13): network errors, timeouts, 429, 5xx and exhausted quota are temporary; a request the provider understood and rejected as unanswerable (for example no match found) is permanent. Anything unclear is temporary. Pass every error message through `redact_key()`.
+  - Tests with a mocked `httr` layer: success, 429 then success, 5xx exhausting retries, 4xx not retried, missing key, and the temporary/permanent classification for each case.
   - Done when: all behaviors pass with no network calls.
   - _Requirements: 6.5, 7.3, 11.1, 11.3, 11.4_
 
@@ -95,7 +98,7 @@ Working rules for every task:
   - _Requirements: 6.4, 14.1, 14.2, 14.5, 14.6, 14.8, 14.9, 14.10_
 
 - [ ] 11. Implement the quota pre-flight and graceful stop
-  - Before routing, count the segments that are not already cached and compare against the remaining quota (from the last seen headers, or a conservative default); report the numbers up front with `message()`.
+  - Before routing, count the segments that are not already cached (an entry older than 120 days counts as not cached) and compare against the remaining quota (from the last seen headers, or a conservative default); report the numbers up front with `message()`.
   - If the run exceeds the quota, route as many segments as fit, cache them, stop cleanly, and return the remaining lanes with `route_error = "quota exhausted; re-run after reset"` so a later re-run completes the job.
   - Tests with a fake provider that reports a small quota: the run stops at the limit, results are cached, and a second run finishes only the remaining segments.
   - Segments with `same_place` TRUE are excluded from the request count and are never sent to a provider (Requirement 9.6).
@@ -186,4 +189,5 @@ Notes on the graph: Tasks 2, 3 and 5 can start in any order once Task 1 is done.
 - **Status convention:** a task is marked `[x]` only when its "Done when" condition has been met and the work is committed on the `phase1-routing` branch.
 - **renv and dev dependencies:** this project's renv ignores Suggests by default. Always snapshot with `renv::snapshot(dev = TRUE)` or `testthat` will drop out of `renv.lock`. `devtools` and `roxygen2` are developer tools and are intentionally not locked; install them separately when developing.
 - **Live quota:** the ORS free quota (about 200 directions and 100 geocoding requests per 24 hours) is shared by all live tasks. Check the remaining quota before each live task (9, 10 and 13) and prefer saved fixtures over repeat calls.
+- **Open question (before Task 10 goes live):** ORS's terms of use on storing geocoding and routing results have not been checked. If they restrict storage, the disk cache default (design, Component 8) or the geocode cache may need limits. Route distances and geocodes are separate questions. Check the terms before the disk cache is used with live data.
 - **Spec changes during build:** when a task reveals something that changes the design (a live finding, a decision), update `design.md` or `requirements.md` in the same commit as the code so the documents never drift from the implementation.

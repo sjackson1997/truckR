@@ -86,7 +86,7 @@ Example: 25 lanes from Mexico City that all pass through Laredo produce one "Mex
 
 - Input: the unique location keys appearing in the segments table.
 - Coordinates pass through unchanged (14.1). Everything else is looked up through the provider's geocoder, restricted to the location's country (14.2).
-- De-duplicated before any call (14.3). Results cached in an in-session environment, with an optional on-disk cache under `tools::R_user_dir("truckR", "cache")` (14.4). The key includes provider name so caches are not mixed.
+- De-duplicated before any call (14.3). Answers are cached in memory and on disk (14.4); see Component 8 for how the two layers work together, how old entries expire, and which failures are stored.
 - Each result records coordinates, a match type/confidence and an error if any (14.5, 14.6). Failed or low-confidence locations never stop the run.
 
 ### 5. Provider interface
@@ -95,8 +95,10 @@ A provider is a named list of functions, registered with `register_provider()` (
 
 | Function | Purpose |
 |---|---|
-| `geocode(location)` | takes a location as a list of whatever components exist (street address, zip, city, state, country) and chooses its own strategy; returns `lon`, `lat`, match layer, error |
-| `route_segment(from, to)` | one pair of coordinates to `distance_m`, `duration_s`, error |
+| `geocode(location)` | takes a location as a list of whatever components exist (street address, zip, city, state, country) and chooses its own strategy; returns `lon`, `lat`, match layer, error, `error_permanent` |
+| `route_segment(from, to)` | one pair of coordinates to `distance_m`, `duration_s`, error, `error_permanent` |
+
+`error_permanent` is TRUE only when retrying can never help (a place that cannot be found, a zip-only location the provider does not support). Network errors, timeouts, HTTP 429 and 5xx, and exhausted quota are temporary. When a provider leaves `error_permanent` unset, the failure is treated as temporary, which is the safe choice because temporary failures are never stored (Requirement 14.13).
 | `validate_credentials()` | TRUE/FALSE or an error with guidance |
 | `limits` (optional) | a list with `requests_per_minute`, used for throttling |
 | `profile` (optional) | a string naming the routing profile (for example `"driving-hgv"`); part of the cache key |
@@ -144,6 +146,34 @@ Details as built (`assemble_results(df, prepped, built, seg_results, waypoint, p
 - `route_error` joins every problem for a lane with "; ", prefixed by where it happened: "origin to waypoint: ...", "waypoint to destination: ...", "direct route: ...". NA means nothing to report. A waypoint lane whose direct segment failed but whose legs succeeded keeps its routed values.
 - `geocode_flag` combines optional per-location notes (`location_flags`, columns `location_key` and `flag`) as "origin: ...; destination: ...; waypoint: ...", showing the waypoint note only on lanes that use the waypoint.
 - A result column name that already exists in the input (for example `distance_direct`) is an error, so no user column is overwritten. The waypoint-only names are checked only when waypoint columns are added.
+
+### 8. Cache (internal, Task 7)
+
+The cache stores answers the provider has already given, so the package never pays quota twice for the same answer. It holds two kinds: geocode results (keyed by provider and the exact location components used) and route segments (keyed by provider, routing profile, and the rounded coordinates of the start and end, so a place that is later geocoded to somewhat different coordinates has its routes requested again). It never holds an API key.
+
+**Two layers, one lookup order.** The session layer is an R environment in memory; the disk layer is files under `tools::R_user_dir("truckR", "cache")`, outside the project, git and OneDrive. For every needed answer the package looks in memory, then on disk, then asks the provider (Requirement 14.11). There is no capacity threshold and nothing "overflows" from memory to disk: memory is simply the fast copy of whatever is on disk plus the answers from this run.
+
+**When data moves between the layers:**
+- The first time a session needs the disk cache, the file for that provider and kind is read once into memory. After that, lookups never touch the disk.
+- A new answer from the provider goes into memory immediately.
+- New answers are written to disk in batches: every 25 new answers, and at the end of every run, including a run that stops early because of quota exhaustion, an error or an interrupt (`on.exit`). If R is killed outright, at most the last unwritten batch is lost, which is fewer than 25 answers.
+- Disk files are written to a temporary file and then renamed, so a crash during a write cannot leave a damaged cache.
+- The disk layer can be switched off (the option `truckr.cache`, with values `"disk"`, the default, and `"session"`). Whether it should be on by default also depends on ORS's terms on storing results, which have not been checked yet (see Open Questions in `tasks.md` Notes).
+
+**Expiry (Requirement 14.12).** Each entry stores the time it was obtained. An entry older than 120 days is treated as missing: it is requested again, replaced, and expired entries are dropped from the file at the next write. Age counts from when the answer was obtained, not from when it was last used, so a frequently used answer is still refreshed every 120 days. The limit is the option `truckr.cache_max_age_days` (default 120). An answer exactly 120 days old is still used; one second older is not. The quota pre-flight (Task 11) counts expired entries as not cached, so a run after a long absence budgets for a full set of requests.
+
+**Failures (Requirement 14.13).** Temporary failures (network errors, timeouts, HTTP 429 and 5xx, exhausted quota, or anything the provider does not mark permanent) are never stored anywhere. A permanent failure (for example a place that cannot be found) is remembered in memory for the current session only, so it is not retried within the session, and is never written to disk. A later session therefore tries again, which costs one request and picks up any fix to the data or the provider.
+
+**Managing it.** `truckr_cache_info()` reports the folder path, the number of entries by provider and kind, the age of the oldest, how many are expired, and the size on disk. `truckr_cache_clear()` empties the memory layer, the disk layer, or both, optionally for one provider. Deleting the folder by hand has the same effect.
+
+**As built (`R/cache.R`).**
+- **Files:** one file per provider and kind in the cache folder, named `<provider>.geocode.rds` and `<provider>.route.<profile>.rds`. The folder is `tools::R_user_dir("truckR", "cache")`, on this machine `C:\Users\KQV2764\AppData\Local\R\cache\R\truckR`, created on the first write. Only files with these names are ever listed, read or deleted.
+- **Options:** `truckr.cache` (`"disk"` or `"session"`), `truckr.cache_max_age_days` (120), `truckr.cache_dir` and `truckr.cache_flush_every` (25). All are checked on every lookup and save, so a bad value is reported at once.
+- **Internal interface used by later tasks:** `cache_store(provider, kind, profile)` names a store; `cache_get(store, key)` returns the saved entry (`value`, `obtained`, `failure`) or `NULL`; `cache_put(store, key, value)` takes a provider result and returns `"stored"`, `"memory_only"` or `"not_stored"` according to the failure rules; `cache_flush_all()` is what `route()` calls from `on.exit()`; `route_cache_key(from, to)` builds a segment key from two coordinate pairs (longitude first, five decimals); geocode keys are the `location_key()` strings from Task 4.
+- **Several R sessions:** a write first re-reads the file and adds the waiting answers to it (the newer answer wins), so answers saved by another R session are not overwritten.
+- **Problems with the files:** a damaged file, one from a different package version, or one with the wrong shape is ignored with a message and rebuilt on the next write; a single malformed entry is skipped quietly. If the folder cannot be written, one warning is given per session, the answers stay in memory, and the write is retried.
+- **Secrets:** all text in a result goes through `redact_key()` before it is saved, so an API key can never reach the cache even if a provider returns one in a message or URL.
+- **Minimum R version:** `tools::R_user_dir()` needs R 4.0, so the package now requires R 4.0.0 or newer.
 
 ## Data Models
 
@@ -206,7 +236,7 @@ Across the whole run, the number of provider routing requests is at most the num
 **Validates: Requirements 13.11, 14.3**
 
 ### Property 8: Repeat runs are free
-Running the same input a second time, with the cache intact, makes zero provider requests and returns identical results.
+Running the same input a second time, with the cache intact and every entry younger than 120 days, makes zero provider requests and returns identical results.
 
 **Validates: Requirements 14.4**
 
@@ -235,6 +265,21 @@ No provider request is ever made for a route whose start and end are the same lo
 
 **Validates: Requirements 9.6**
 
+### Property 14: Temporary failures are never stored
+A failure caused by a network error, timeout, HTTP 429 or 5xx, or exhausted quota (or any failure not marked permanent) leaves nothing in the memory or disk cache, so the same request is attempted again on the next run. A permanent failure appears in the memory cache only, never on disk.
+
+**Validates: Requirements 14.13**
+
+### Property 15: Old answers are refreshed
+A cached answer older than 120 days is never returned. It is requested again and replaced, and answers younger than 120 days are returned without a request.
+
+**Validates: Requirements 14.12**
+
+### Property 16: Work already paid for is kept
+When a run stops early (quota exhausted, an error or an interrupt), every answer obtained before it stopped is available to the next run.
+
+**Validates: Requirements 14.11**
+
 ## Error Handling
 
 - No provider configured, missing key, or inconsistent waypoint arguments: stop immediately with a clear message naming the fix.
@@ -255,7 +300,7 @@ No test infrastructure exists yet; Phase 1 adds `testthat` (3rd edition) to Sugg
 1. **ORS maximum route distance: retired for the lanes tested.** The spike returned a 3,104 km (1,929 mi) Mexico City to Los Angeles route with no error, so the longest lanes in your example work, including as a single direct segment. Not tested: lanes longer than about 3,400 km (for example Mexico to the US northeast or Canada), which remain unverified.
 2. **Quota is the main constraint (new, highest risk).** Response headers report **200 directions and 100 geocoding requests per 24 hours**. A single waypoint lane can need up to 3 directions requests (direct plus two legs). Practical consequences, all pulled forward into Phase 1:
    - Segment de-duplication (Requirement 13.11) and location de-duplication (Requirement 14.3) are essential, not optimizations.
-   - The persistent on-disk cache (Requirement 14.4) is required in Phase 1, for both geocodes and route segments, keyed by provider and profile. Re-running a job then spends no quota on work already done.
+   - The persistent on-disk cache (Requirement 14.4) is required in Phase 1, for both geocodes and route segments, keyed by provider and profile. Re-running a job within 120 days then spends no quota on work already done (Requirement 14.12); after a longer absence the answers are refreshed.
    - `route()` checks the planned request count against the remaining quota before starting, and says so up front ("this run needs 340 directions requests; about 196 remain"). If it exceeds the quota, it processes as many segments as fit, caches them, and returns the remaining lanes as `route_error = "quota exhausted; re-run after reset"`, so a second run the next day finishes the job.
    - Geocoding at the city/state level where the provider supports it (see Risk 3) collapses many lanes onto fewer locations.
    - **Development sizing:** `df_route_samples` has 80 rows, 74 distinct lanes and 77 distinct locations (countries CA, MX, US); `df_route_unclean` has 74 lanes and 82 locations. One full run therefore needs about 74 directions and 77 geocoding requests, which fits in a day, but only once. These samples have almost no repeated lanes, so they will not exercise de-duplication; that is tested with synthetic data in mocked tests. The cache is what makes repeated development runs affordable. The earlier spike already used 7 geocoding and 4 directions requests.
