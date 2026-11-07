@@ -133,8 +133,17 @@ For each lane, using its segment ids:
 - `distance_routed`, `duration_routed` equal the direct values for non-waypoint lanes, or the sum of the two leg segments for waypoint lanes (13.9). If either leg failed, they are NA with the error recorded (13.9).
 - `has_waypoint` is TRUE/FALSE for every lane (13.6).
 - Only when at least one lane uses a waypoint, the extra columns are added: waypoint value and type, `detour_added`, `detour_duration_added`; all NA for non-waypoint lanes (13.8).
-- Sanity check (13.10): flags lanes where routed is shorter than direct beyond 0.5%, which suggests a mis-geocoded waypoint.
-- Results are joined back to the user's original rows, so row count and order match the input.
+- Sanity check (13.10): flags lanes where routed is shorter than direct beyond 0.5%, which suggests a mis-geocoded waypoint. The numbers are kept and a note starting "check:" is added to `route_error`. The tolerance is an argument (default 0.005).
+- Results are joined back to the user's original rows, so row count and order match the input. The original columns come first and are not changed; the result is always a tibble.
+
+Details as built (`assemble_results(df, prepped, built, seg_results, waypoint, provider_name, location_flags, tolerance)`):
+
+- `seg_results` is a plain table with `SegmentId`, `distance_m`, `duration_s`, `error`. Meters and seconds are converted to miles and hours here, once, by `meters_to_miles()` (divide by 1609.344) and `seconds_to_hours()` (divide by 3600), so no provider converts anything.
+- A segment with an error has NA numbers even if the provider sent some. A segment missing from `seg_results` gets the error "no result was returned for this segment", and one with no numbers and no error gets "the provider returned no distance or duration". A segment marked `same_place` is zero length: 0 miles and 0 hours with no result needed.
+- Lanes flagged in `lane_error` (empty location, or same origin and destination without a waypoint) have all numbers NA and that text in `route_error`. A same-place waypoint lane takes its routed numbers from its two legs, has NA direct and detour values, and a note that the direct distance does not apply (Requirement 9.6).
+- `route_error` joins every problem for a lane with "; ", prefixed by where it happened: "origin to waypoint: ...", "waypoint to destination: ...", "direct route: ...". NA means nothing to report. A waypoint lane whose direct segment failed but whose legs succeeded keeps its routed values.
+- `geocode_flag` combines optional per-location notes (`location_flags`, columns `location_key` and `flag`) as "origin: ...; destination: ...; waypoint: ...", showing the waypoint note only on lanes that use the waypoint.
+- A result column name that already exists in the input (for example `distance_direct`) is an error, so no user column is overwritten. The waypoint-only names are checked only when waypoint columns are added.
 
 ## Data Models
 

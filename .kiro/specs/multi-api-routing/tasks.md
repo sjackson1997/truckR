@@ -52,7 +52,7 @@ Working rules for every task:
   - Done when: registering a valid fake provider works, invalid ones fail with clear messages, and no key value appears in any message or test output.
   - _Requirements: 1.2, 1.4, 1.5, 7.1, 7.3, 7.4, 7.5, 8.1, 8.3, 8.4, 8.5_
 
-- [ ] 6. Implement unit conversion and `assemble_results()`
+- [x] 6. Implement unit conversion and `assemble_results()`
   - Central conversion from meters to miles and seconds to hours (providers never convert).
   - `assemble_results()` maps segment results back to lanes and builds `distance_direct`, `distance_routed`, `duration_direct`, `duration_routed`, `has_waypoint`, `provider_name`, `route_error` and `geocode_flag`; routed values are the sum of the two legs for waypoint lanes and equal to the direct values otherwise; NA with an error message if either leg failed.
   - Add the waypoint-only columns (`waypoint_value`, `waypoint_type`, `detour_added`, `detour_duration_added`) only when at least one lane uses a waypoint, NA for other lanes; add no extra columns otherwise.
