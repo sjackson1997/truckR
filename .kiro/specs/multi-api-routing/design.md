@@ -124,8 +124,34 @@ Endpoint details below were first taken from ORS community documentation and the
 - Geocoding: `GET https://api.openrouteservice.org/geocode/search` with `text`, optional `layers` (for example `postalcode`), `boundary.country`, and `size=1`.
 - Key: read from `TRUCKR_ORS_API_KEY` at call time (Requirement 7.1, 7.3); never stored in the package, a closure or a cache. `truckr_has_key("ors")` reports TRUE/FALSE (7.4).
 - Throttling: spaces requests to stay under a configurable requests-per-minute (6.5; forum sources report 40 per minute, not tested). The provider reads the `x-ratelimit-limit` and `x-ratelimit-remaining` headers from each response, and stops cleanly before the quota is exhausted, returning what it has with the remaining lanes marked as not yet routed (see Risk 2).
-- Errors: HTTP 429 and 5xx are retried with exponential backoff (default 3 attempts); other 4xx are not retried. A failed segment returns NA with the reason (Requirement 6.3). Full retry and batching features are Phase 2; Phase 1 has only this minimum.
+- Errors: network errors, HTTP 5xx and rate-limit 429s are retried with exponential backoff (default 3 retries); other 4xx are not retried. A failed segment returns NA with the reason (Requirement 6.3). Full retry and batching features are Phase 2; Phase 1 has only this minimum. Details of what was built are below under "ORS HTTP layer as built".
 - Profile: `driving-hgv`. Truck dimension options (weight, height) are not exposed in Phase 1.
+
+**ORS HTTP layer as built (`R/ors_http.R`, Task 8).** Two internal layers. `ors_http()` makes exactly one HTTP call and is the only function that touches the network (tests replace it). `ors_request(kind, path, query, body)` sits on top and does everything else. `kind` is `"directions"` (POST, key in the `Authorization` header, JSON body) or `"geocode"` (GET, key as the `api_key` query parameter), as confirmed in the spike. Whether geocoding also accepts the key in the header is untested; if it does, switching would keep the key out of URLs entirely, and Task 10 should try it.
+
+- **Result:** `ors_request()` never stops on a failed request. It returns `ok`, `status`, `body` (parsed JSON), `error` (NA on success), `error_permanent`, `error_kind`, `attempts` and `rate_limit` (limit, remaining, reset from the last response). A missing key is the one thing that does stop, before anything is sent.
+- **Retries:** a network error, a 5xx, or a 429 that is not the daily quota running out is retried up to `truckr.http_retries` times (default 3, so at most 4 requests), waiting 2, 4 and 8 seconds (`truckr.http_backoff_seconds`, doubled each time, at most 30 s). A larger `Retry-After` from the server is honoured up to 60 s. Each retry prints a `message()` (Requirement 11.4). After the last retry the error ends "(gave up after N attempts)". This follows Requirement 11.1 literally (3 retries); the earlier wording "3 attempts" in the design and tasks was corrected.
+- **Spacing:** requests are spaced evenly under `truckr.ors_requests_per_minute` (default 40, unverified), so 40 per minute means at least 1.5 s between requests, shared by directions and geocoding. The first request never waits.
+- **Classification (Requirement 14.13).** Every failure is marked temporary or permanent so the cache knows what to keep:
+
+| Outcome | `error_kind` | Retried | `error_permanent` |
+|---|---|---|---|
+| network error, timeout | `network` | yes | FALSE |
+| 5xx | `server` | yes | FALSE |
+| 429 with quota left (or no header) | `rate_limit` | yes | FALSE |
+| 429 with `x-ratelimit-remaining` = 0 | `quota` | no | FALSE |
+| 401, 403 | `auth` | no | FALSE |
+| 400 | `bad_request` | no | TRUE |
+| 404 | `not_found` | no | TRUE |
+| other 4xx | `client` | no | FALSE |
+| 2xx but the body is not JSON | `unparseable` | no | FALSE |
+| any other status | `unexpected` | no | FALSE |
+
+  Only 400 and 404, where ORS understood the request and cannot answer it (for example no routable point near a coordinate, or a distance over its limit), are permanent. A wrong or disabled key (`auth`) is deliberately temporary: if it were remembered as permanent, fixing the key mid-session would not help. Later tasks should treat `auth` and `quota` as reasons to stop the whole run, not only the lane.
+- **Rate-limit bookkeeping:** the latest `x-ratelimit-limit`, `-remaining` and `-reset` for directions and geocoding are remembered for the session (`ors_quota()`), for the quota pre-flight in Task 11. A response without these headers leaves the remembered numbers alone. Header names are matched without regard to case.
+- **Messages and the key:** error text comes from ORS's own `error.message` and `error.code` when present, otherwise the start of the raw response. Every message, including the retry notices, passes through `redact_key()`, so a key echoed back by the server or contained in an httr error URL never reaches the user or the cache.
+- **Unverified assumptions** (to check in the live tasks): that ORS signals an exhausted daily quota with a 429 whose `x-ratelimit-remaining` is 0; that a per-minute limit is a 429 with quota left; that 401 and 403 mean a key problem; the 40-per-minute figure; and the meaning of `x-ratelimit-reset` (the spike saw reset times that differ by exactly 24 hours between calls, so the message says "should reset around"). If a live call shows different behaviour, only `ors_classify()` needs to change.
+- **Settings:** `truckr.http_retries`, `truckr.http_backoff_seconds`, `truckr.http_timeout` (30 s), `truckr.ors_requests_per_minute` and `truckr.ors_base_url` (default `https://api.openrouteservice.org`, which also allows a self-hosted server). Bad values are reported before anything is sent.
 
 ### 7. `assemble_results()` (internal): back to lanes
 
