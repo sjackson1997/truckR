@@ -112,7 +112,7 @@ Working rules for every task:
   - Pass each location's geocode `flag` to `assemble_results()` as `location_flags`, and extend `assemble_results()` with the always-present logical column `geocode_check`: TRUE for a lane when any of its locations (origin, destination, waypoint) has a flag starting "CHECK:", FALSE otherwise (Requirement 14.15). Add it to the always-present column lists in the tests.
   - Full offline end-to-end tests with a fake provider: `df_route_samples` with no waypoint column; a Mexico-to-California fixture with `Use_Waypoint` and a Laredo waypoint; a lane with a failed geocode; a lane with a failed leg.
   - Done when: offline end-to-end tests pass, row count and order match the input, and the always-present columns exist in every scenario.
-  - _Requirements: 1.1, 1.3, 1.4, 6.1, 9.4, 12.1, 12.2, 13.1_
+  - _Requirements: 1.1, 1.3, 1.4, 6.1, 9.4, 12.1, 12.2, 13.1, 14.15_
 
 - [ ] 13. LIVE end-to-end verification on a small subset
   - Run `route()` against about 10 lanes from `df_route_samples` plus 2 Mexico-to-California fixture lanes with a Laredo waypoint (budget: about 25 directions and 25 geocoding requests, fewer with caching; check remaining quota first and stop if under budget).
