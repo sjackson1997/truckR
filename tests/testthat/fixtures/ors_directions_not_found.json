@@ -1,0 +1,25 @@
+{
+  "_note": "Captured live from ORS (api.heigit.org): the first coordinate is in the Pacific Ocean, far from any road.",
+  "status": 404,
+  "headers": {
+    "limit": 2000,
+    "remaining": 1998,
+    "reset": 1794410137
+  },
+  "body": {
+    "error": {
+      "code": 2010,
+      "message": "Could not find routable point within a radius of 350.0 meters of specified coordinate 0: -140.0000000 30.0000000."
+    },
+    "info": {
+      "engine": {
+        "build_date": "2026-10-14T07:31:58Z",
+        "graph_version": "7",
+        "graph_date": "2026-10-17T18:52:55Z",
+        "osm_date": "2026-10-11T00:00:00Z",
+        "version": "10.1.0"
+      },
+      "timestamp": 1794323739824
+    }
+  }
+}

@@ -147,11 +147,7 @@ check_cache_key <- function(key) {
 #' @noRd
 route_cache_key <- function(from, to) {
   point <- function(p, what) {
-    if (!is.null(names(p)) && all(c("lon", "lat") %in% names(p))) p <- p[c("lon", "lat")]
-    p <- suppressWarnings(as.numeric(unname(p)))
-    if (length(p) != 2 || anyNA(p)) {
-      stop(sprintf("`%s` must be two numbers: longitude and latitude.", what), call. = FALSE)
-    }
+    p <- lonlat_vector(p, what)
     sprintf("%.5f,%.5f", p[1], p[2])
   }
   paste0(point(from, "from"), ">", point(to, "to"))

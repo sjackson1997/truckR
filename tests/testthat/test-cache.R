@@ -32,6 +32,7 @@ test_that("route keys use rounded coordinates, longitude first", {
 test_that("bad route key input is rejected", {
   expect_error(route_cache_key(1, c(3, 4)), "`from` must be two numbers")
   expect_error(route_cache_key(c(1, 2), c(NA, 4)), "`to` must be two numbers")
+  expect_error(route_cache_key(c(1, 2), c(3, 95)), "`to` is outside the valid range")
 })
 
 test_that("bad cache keys and values are rejected", {

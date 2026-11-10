@@ -45,10 +45,27 @@ numeric_option <- function(name, default, positive = TRUE, whole = FALSE) {
   value
 }
 
-ors_base_url <- function() {
-  url <- getOption("truckr.ors_base_url", "https://api.openrouteservice.org")
+#' The web address of an ORS service
+#'
+#' ORS moved its public API from api.openrouteservice.org (deprecated since
+#' April 2026, restricted to 10 percent of the quota, and to be shut down in
+#' early November 2026) to api.heigit.org, where each service has its own
+#' address: routing under /openrouteservice and geocoding under /pelias/v1.
+#' Both are settings so a self-hosted server can be used, for example
+#' \code{options(truckr.ors_directions_url = "http://localhost:8080/ors")}.
+#' @noRd
+ors_service_url <- function(kind = c("directions", "geocode")) {
+  kind <- match.arg(kind)
+  option <- if (kind == "directions") "truckr.ors_directions_url" else "truckr.ors_geocode_url"
+  default <- if (kind == "directions") {
+    "https://api.heigit.org/openrouteservice"
+  } else {
+    "https://api.heigit.org/pelias/v1"
+  }
+
+  url <- getOption(option, default)
   if (!is.character(url) || length(url) != 1 || is.na(url) || !grepl("^https?://", url)) {
-    stop("Option `truckr.ors_base_url` must be a web address starting with http:// or https://.", call. = FALSE)
+    stop(sprintf("Option `%s` must be a web address starting with http:// or https://.", option), call. = FALSE)
   }
   sub("/+$", "", url)
 }
@@ -79,7 +96,8 @@ ors_max_wait_seconds <- 60
 ors_backoff_cap_seconds <- 30
 
 ors_check_settings <- function() {
-  ors_base_url()
+  ors_service_url("directions")
+  ors_service_url("geocode")
   ors_requests_per_minute()
   ors_max_attempts()
   ors_backoff_seconds()
@@ -387,8 +405,9 @@ ors_quota <- function(kind = c("directions", "geocode")) {
 #'
 #' @param kind \code{"directions"} (a POST with a JSON body) or
 #'   \code{"geocode"} (a GET).
-#' @param path The path after the host, for example
-#'   \code{"/v2/directions/driving-hgv"}.
+#' @param path The path after the service address (see
+#'   \code{ors_service_url()}): \code{"/v2/directions/driving-hgv"} for
+#'   directions, \code{"/search"} for geocoding.
 #' @param query Query parameters (a list).
 #' @param body For directions: the request body (a list, sent as JSON).
 #'
@@ -405,7 +424,7 @@ ors_request <- function(kind = c("directions", "geocode"), path, query = list(),
   ors_check_settings()
   key <- get_api_key("ors")
 
-  url <- paste0(ors_base_url(), path)
+  url <- paste0(ors_service_url(kind), path)
   if (kind == "geocode") {
     method <- "GET"
     query <- c(list(api_key = key), query)

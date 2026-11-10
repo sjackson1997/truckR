@@ -84,6 +84,8 @@ The truckR package currently supports only the PC Miler API for transportation r
 3. WHEN the OpenRouteService API returns an error, THE ORS_Provider SHALL include the error detail in the Route_Result error fields
 4. THE ORS_Provider SHALL geocode city/state/zip/country addresses to coordinates before requesting routes, since the Directions API requires coordinate inputs
 5. THE ORS_Provider SHALL respect the free-tier rate limit by throttling requests to a configurable maximum requests-per-minute
+6. THE ORS_Provider SHALL use the current official ORS service addresses by default (api.heigit.org; the older api.openrouteservice.org is deprecated and is being shut down) and SHALL allow the address of each service to be changed by a setting, so that a self-hosted server can be used and a future address change needs no code change
+7. WHEN ORS rejects a route as longer than its configured maximum (6,000 km, approximated, on the public API) or cannot find a road near a coordinate, THE ORS_Provider SHALL report it as a permanent failure for that segment, naming ORS's explanation, and SHALL NOT retry it
 
 ### Requirement 7: API Key and Secrets Management
 

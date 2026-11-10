@@ -1,0 +1,25 @@
+{
+  "_note": "Captured live from ORS (api.heigit.org): Mexico City to Anchorage AK, longer than the public API allows.",
+  "status": 400,
+  "headers": {
+    "limit": 2000,
+    "remaining": 1997,
+    "reset": 1794410137
+  },
+  "body": {
+    "error": {
+      "code": 2004,
+      "message": "Request parameters exceed the server configuration limits. The approximated route distance must not be greater than 6000000.0 meters."
+    },
+    "info": {
+      "engine": {
+        "build_date": "2026-10-14T07:31:58Z",
+        "graph_version": "7",
+        "graph_date": "2026-10-17T18:52:55Z",
+        "osm_date": "2026-10-11T00:00:00Z",
+        "version": "10.1.0"
+      },
+      "timestamp": 1794323742059
+    }
+  }
+}

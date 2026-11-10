@@ -1,0 +1,58 @@
+{
+  "_note": "Captured live from ORS (api.heigit.org), driving-hgv profile, Laredo TX to San Antonio TX, geometry and instructions off.",
+  "status": 200,
+  "headers": {
+    "limit": 2000,
+    "remaining": 1999,
+    "reset": 1794323737
+  },
+  "body": {
+    "bbox": [
+      -99.507557,
+      27.503565,
+      -98.493623,
+      29.424294
+    ],
+    "metadata": {
+      "query": {
+        "coordinates": [
+          [
+            -99.5075,
+            27.5036
+          ],
+          [
+            -98.4936,
+            29.4241
+          ]
+        ],
+        "format": "json",
+        "profile": "driving-hgv",
+        "profileName": "driving-hgv"
+      },
+      "attribution": "openrouteservice.org | OpenStreetMap contributors",
+      "engine": {
+        "build_date": "2026-10-14T07:31:58Z",
+        "graph_date": "2026-10-17T18:52:55Z",
+        "osm_date": "2026-10-11T00:00:00Z",
+        "version": "10.1.0"
+      },
+      "service": "routing",
+      "system_message": "Please note that the URL api.openrouteservice.org has been deprecated. All information available at ask.openrouteservice.org",
+      "timestamp": 1794323737654
+    },
+    "routes": [
+      {
+        "bbox": [
+          -99.507557,
+          27.503565,
+          -98.493623,
+          29.424294
+        ],
+        "summary": {
+          "distance": 252069.5,
+          "duration": 10527.8
+        }
+      }
+    ]
+  }
+}

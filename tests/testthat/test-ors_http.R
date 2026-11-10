@@ -232,7 +232,7 @@ test_that("directions requests send the key in the Authorization header", {
   call <- log$calls[[1]]
 
   expect_equal(call$method, "POST")
-  expect_equal(call$url, "https://api.openrouteservice.org/v2/directions/driving-hgv")
+  expect_equal(call$url, "https://api.heigit.org/openrouteservice/v2/directions/driving-hgv")
   expect_equal(call$headers[["Authorization"]], ors_test_key)
   expect_null(call$query$api_key)
   expect_equal(call$body, list(a = 1))
@@ -241,11 +241,11 @@ test_that("directions requests send the key in the Authorization header", {
 test_that("geocoding requests send the key as the api_key parameter", {
   log <- local_ors(list(raw_ok()))
 
-  ors_request("geocode", "/geocode/search", query = list(text = "Laredo", size = 1))
+  ors_request("geocode", "/search", query = list(text = "Laredo", size = 1))
   call <- log$calls[[1]]
 
   expect_equal(call$method, "GET")
-  expect_equal(call$url, "https://api.openrouteservice.org/geocode/search")
+  expect_equal(call$url, "https://api.heigit.org/pelias/v1/search")
   expect_equal(call$query$api_key, ors_test_key)
   expect_equal(call$query$text, "Laredo")
   expect_equal(call$query$size, 1)
@@ -260,14 +260,28 @@ test_that("a missing key stops before anything is sent", {
   expect_length(log$calls, 0)
 })
 
-test_that("the base address and timeout can be set", {
-  log <- local_ors(list(raw_ok()))
-  withr::local_options(truckr.ors_base_url = "http://localhost:8080/ors/", truckr.http_timeout = 5)
+test_that("the service addresses and timeout can be set, for example for a self-hosted server", {
+  log <- local_ors(list(raw_ok(), raw_ok()))
+  withr::local_options(
+    truckr.ors_directions_url = "http://localhost:8080/ors/",
+    truckr.ors_geocode_url = "http://localhost:8081/pelias/v1",
+    truckr.http_timeout = 5
+  )
 
   ors_request("directions", "/v2/directions/driving-hgv")
+  ors_request("geocode", "/search")
 
   expect_equal(log$calls[[1]]$url, "http://localhost:8080/ors/v2/directions/driving-hgv")
+  expect_equal(log$calls[[2]]$url, "http://localhost:8081/pelias/v1/search")
   expect_equal(log$calls[[1]]$timeout, 5)
+})
+
+test_that("the default addresses are the current api.heigit.org ones, not the deprecated host", {
+  withr::local_options(truckr.ors_directions_url = NULL, truckr.ors_geocode_url = NULL)
+
+  expect_equal(ors_service_url("directions"), "https://api.heigit.org/openrouteservice")
+  expect_equal(ors_service_url("geocode"), "https://api.heigit.org/pelias/v1")
+  expect_false(grepl("api.openrouteservice.org", ors_service_url("directions"), fixed = TRUE))
 })
 
 # --- Retrying -------------------------------------------------------------------------------------------------------------------------------
@@ -573,8 +587,10 @@ test_that("bad settings are reported before anything is sent", {
   expect_error(ors_request("directions", "/x"), "`truckr.http_backoff_seconds` must be a single positive number")
   withr::local_options(truckr.http_backoff_seconds = 2, truckr.ors_requests_per_minute = "fast")
   expect_error(ors_request("directions", "/x"), "truckr.ors_requests_per_minute")
-  withr::local_options(truckr.ors_requests_per_minute = 40, truckr.ors_base_url = "ftp://x")
-  expect_error(ors_request("directions", "/x"), "http:// or https://")
+  withr::local_options(truckr.ors_requests_per_minute = 40, truckr.ors_directions_url = "ftp://x")
+  expect_error(ors_request("directions", "/x"), "`truckr.ors_directions_url` must be a web address starting with http:// or https://")
+  withr::local_options(truckr.ors_directions_url = NULL, truckr.ors_geocode_url = "localhost")
+  expect_error(ors_request("geocode", "/x"), "`truckr.ors_geocode_url` must be a web address")
   expect_length(log$calls, 0)
 })
 

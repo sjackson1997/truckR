@@ -45,7 +45,8 @@ local_ors <- function(responses = list(), env = parent.frame(), key = ors_test_k
   withr::local_envvar(TRUCKR_ORS_API_KEY = key, .local_envir = env)
   withr::local_options(
     list(
-      truckr.ors_base_url = NULL,
+      truckr.ors_directions_url = NULL,
+      truckr.ors_geocode_url = NULL,
       truckr.ors_requests_per_minute = NULL,
       truckr.http_attempts = NULL,
       truckr.http_backoff_seconds = NULL,
@@ -111,5 +112,25 @@ fake_httr_response <- function(status = 200L, text = "{}", headers = list(), typ
       handle = NULL
     ),
     class = "response"
+  )
+}
+
+# A response captured live from ORS and saved in tests/testthat/fixtures/,
+# in the same shape ors_http() returns.
+read_fixture <- function(name) {
+  path <- testthat::test_path("fixtures", paste0(name, ".json"))
+  fx <- jsonlite::fromJSON(path, simplifyVector = FALSE)
+  number <- function(x) if (is.null(x)) NA_real_ else as.numeric(x)
+  list(
+    status = as.integer(fx[["status"]]),
+    body = fx[["body"]],
+    text = as.character(jsonlite::toJSON(fx[["body"]], auto_unbox = TRUE)),
+    headers = list(
+      limit = number(fx[["headers"]][["limit"]]),
+      remaining = number(fx[["headers"]][["remaining"]]),
+      reset = number(fx[["headers"]][["reset"]]),
+      retry_after = NA_real_
+    ),
+    error = NA_character_
   )
 }
