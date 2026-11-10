@@ -1,0 +1,104 @@
+{
+  "_note": "Live: US zip 78040 on the postalcode layer.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2999,
+    "reset": 1794333115
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "78040",
+        "size": 3,
+        "layers": [
+          "postalcode"
+        ],
+        "private": false,
+        "boundary.country": [
+          "USA"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "pelias",
+        "parsed_text": {
+          "subject": "78040",
+          "postcode": "78040"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333115190
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.502144,
+            27.513811
+          ]
+        },
+        "properties": {
+          "id": "554783713",
+          "gid": "whosonfirst:postalcode:554783713",
+          "layer": "postalcode",
+          "source": "whosonfirst",
+          "source_id": "554783713",
+          "name": "78040",
+          "postalcode": "78040",
+          "postalcode_gid": "whosonfirst:postalcode:554783713",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "Texas",
+          "region_gid": "whosonfirst:region:85688753",
+          "region_a": "TX",
+          "county": "Webb County",
+          "county_gid": "whosonfirst:county:102081071",
+          "locality": "Laredo",
+          "locality_gid": "whosonfirst:locality:101725033",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "78040, Laredo, TX, USA",
+          "addendum": {
+            "concordances": {
+              "gp:id": "12791887"
+            }
+          }
+        },
+        "bbox": [
+          -99.528392,
+          27.485796,
+          -99.478679,
+          27.53106
+        ]
+      }
+    ],
+    "bbox": [
+      -99.528392,
+      27.485796,
+      -99.478679,
+      27.53106
+    ]
+  }
+}

@@ -119,6 +119,7 @@ fake_httr_response <- function(status = 200L, text = "{}", headers = list(), typ
 # in the same shape ors_http() returns.
 read_fixture <- function(name) {
   path <- testthat::test_path("fixtures", paste0(name, ".json"))
+  if (!file.exists(path)) stop("fixture not found: ", path, call. = FALSE)
   fx <- jsonlite::fromJSON(path, simplifyVector = FALSE)
   number <- function(x) if (is.null(x)) NA_real_ else as.numeric(x)
   list(

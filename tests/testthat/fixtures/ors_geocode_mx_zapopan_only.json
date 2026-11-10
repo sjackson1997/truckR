@@ -1,0 +1,256 @@
+{
+  "_note": "Live: Zapopan with no state; the name is shared by places in several states.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2978,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Zapopan",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "zapopan"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333595799
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -103.431316,
+            20.701353
+          ]
+        },
+        "properties": {
+          "id": "101997877",
+          "gid": "whosonfirst:locality:101997877",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101997877",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Jalisco",
+          "region_gid": "whosonfirst:region:85686603",
+          "region_a": "JAL",
+          "county": "Zapopan",
+          "county_gid": "whosonfirst:county:102074709",
+          "county_a": "ZP",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:101997877",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Zapopan, JAL, Mexico"
+        },
+        "bbox": [
+          -103.486128,
+          20.584788,
+          -103.321834,
+          20.790614
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.0296,
+            22.93693
+          ]
+        },
+        "properties": {
+          "id": "1209666121",
+          "gid": "whosonfirst:locality:1209666121",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209666121",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:1209666121",
+          "label": "Zapopan, Mexico"
+        },
+        "bbox": [
+          -99.0496,
+          22.91693,
+          -99.0096,
+          22.95693
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -92.29639,
+            15.07944
+          ]
+        },
+        "properties": {
+          "id": "1276655541",
+          "gid": "whosonfirst:locality:1276655541",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1276655541",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Chiapas",
+          "region_gid": "whosonfirst:region:85686611",
+          "region_a": "CHP",
+          "county": "Tapachula",
+          "county_gid": "whosonfirst:county:102075511",
+          "county_a": "TP",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:1276655541",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Zapopan, CHP, Mexico"
+        },
+        "bbox": [
+          -92.31639,
+          15.05944,
+          -92.27639,
+          15.09944
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -104.19944,
+            21.96833
+          ]
+        },
+        "properties": {
+          "id": "1209790967",
+          "gid": "whosonfirst:locality:1209790967",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209790967",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Nayarit",
+          "region_gid": "whosonfirst:region:85686591",
+          "region_a": "NAY",
+          "county": "La Yesca",
+          "county_gid": "whosonfirst:county:102074581",
+          "county_a": "YE",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:1209790967",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Zapopan, NAY, Mexico"
+        },
+        "bbox": [
+          -104.21944,
+          21.94833,
+          -104.17944,
+          21.98833
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -103.34749,
+            25.36939
+          ]
+        },
+        "properties": {
+          "id": "1193157283",
+          "gid": "whosonfirst:locality:1193157283",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1193157283",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Coahuila de Zaragoza",
+          "region_gid": "whosonfirst:region:85686689",
+          "region_a": "COA",
+          "county": "Viesca",
+          "county_gid": "whosonfirst:county:102078799",
+          "county_a": "VI",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:1193157283",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Zapopan, COA, Mexico"
+        },
+        "bbox": [
+          -103.36749,
+          25.34939,
+          -103.32749,
+          25.38939
+        ]
+      }
+    ],
+    "bbox": [
+      -104.21944,
+      15.05944,
+      -92.27639,
+      25.38939
+    ]
+  }
+}

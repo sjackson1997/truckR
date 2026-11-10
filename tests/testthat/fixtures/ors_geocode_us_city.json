@@ -1,0 +1,101 @@
+{
+  "_note": "Live: US city and state, several city layers.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2992,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Laredo, TX",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "USA"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "laredo",
+          "state": "tx"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333125399
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.483817,
+            27.53548
+          ]
+        },
+        "properties": {
+          "id": "101725033",
+          "gid": "whosonfirst:locality:101725033",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101725033",
+          "name": "Laredo",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "Texas",
+          "region_gid": "whosonfirst:region:85688753",
+          "region_a": "TX",
+          "county": "Webb County",
+          "county_gid": "whosonfirst:county:102081071",
+          "county_a": "WB",
+          "locality": "Laredo",
+          "locality_gid": "whosonfirst:locality:101725033",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Laredo, TX, USA"
+        },
+        "bbox": [
+          -99.750316,
+          27.366402,
+          -99.331024,
+          27.744402
+        ]
+      }
+    ],
+    "bbox": [
+      -99.750316,
+      27.366402,
+      -99.331024,
+      27.744402
+    ]
+  }
+}

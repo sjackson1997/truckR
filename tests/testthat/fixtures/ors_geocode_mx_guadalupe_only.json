@@ -1,0 +1,445 @@
+{
+  "_note": "Live: Guadalupe with no state, ten results, to see whether the Nuevo Leon one is among them.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2980,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Guadalupe",
+        "size": 10,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "guadalupe"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333269711
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -100.217239,
+            25.68041
+          ]
+        },
+        "properties": {
+          "id": "102000723",
+          "gid": "whosonfirst:locality:102000723",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "102000723",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Nuevo León",
+          "region_gid": "whosonfirst:region:85686681",
+          "region_a": "NLE",
+          "county": "Guadalupe",
+          "county_gid": "whosonfirst:county:102078673",
+          "county_a": "GU",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:102000723",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe, NLE, Mexico"
+        },
+        "bbox": [
+          -100.275937,
+          25.621475,
+          -100.129565,
+          25.731904
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -102.510561,
+            22.750724
+          ]
+        },
+        "properties": {
+          "id": "101992875",
+          "gid": "whosonfirst:locality:101992875",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101992875",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Zacatecas",
+          "region_gid": "whosonfirst:region:85686567",
+          "region_a": "ZAC",
+          "county": "Guadalupe",
+          "county_gid": "whosonfirst:county:102075485",
+          "county_a": "GU",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:101992875",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe, ZAC, Mexico"
+        },
+        "bbox": [
+          -102.545818557,
+          22.7250683626,
+          -102.476268534,
+          22.7855633447
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -98.044426,
+            19.42498
+          ]
+        },
+        "properties": {
+          "id": "101998999",
+          "gid": "whosonfirst:locality:101998999",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101998999",
+          "name": "Guadalupe Texcalac",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Tlaxcala",
+          "region_gid": "whosonfirst:region:85686653",
+          "region_a": "TLA",
+          "county": "Xaloztoc",
+          "county_gid": "whosonfirst:county:102077895",
+          "county_a": "XZ",
+          "locality": "Guadalupe Texcalac",
+          "locality_gid": "whosonfirst:locality:101998999",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe Texcalac, TLA, Mexico"
+        },
+        "bbox": [
+          -98.0607274381,
+          19.4162573955,
+          -98.0322073864,
+          19.4333652147
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -101.38333,
+            26.2
+          ]
+        },
+        "properties": {
+          "id": "1209300277",
+          "gid": "whosonfirst:locality:1209300277",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209300277",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:1209300277",
+          "label": "Guadalupe, Mexico"
+        },
+        "bbox": [
+          -101.40333,
+          26.18,
+          -101.36333,
+          26.22
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -105.6041,
+            26.46307
+          ]
+        },
+        "properties": {
+          "id": "1209202933",
+          "gid": "whosonfirst:locality:1209202933",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209202933",
+          "name": "Guadalupe de la Rueda",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "locality": "Guadalupe de la Rueda",
+          "locality_gid": "whosonfirst:locality:1209202933",
+          "label": "Guadalupe de la Rueda, Mexico"
+        },
+        "bbox": [
+          -105.6241,
+          26.44307,
+          -105.5841,
+          26.48307
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -100.98999,
+            23.46688
+          ]
+        },
+        "properties": {
+          "id": "1209169779",
+          "gid": "whosonfirst:locality:1209169779",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209169779",
+          "name": "Guadalupe del Carnicero",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "locality": "Guadalupe del Carnicero",
+          "locality_gid": "whosonfirst:locality:1209169779",
+          "label": "Guadalupe del Carnicero, Mexico"
+        },
+        "bbox": [
+          -101.00999,
+          23.44688,
+          -100.96999,
+          23.48688
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.82089,
+            25.17188
+          ]
+        },
+        "properties": {
+          "id": "1193252975",
+          "gid": "whosonfirst:locality:1193252975",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1193252975",
+          "name": "Hacienda Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Nuevo León",
+          "region_gid": "whosonfirst:region:85686681",
+          "region_a": "NLE",
+          "county": "Montemorelos",
+          "county_gid": "whosonfirst:county:102078739",
+          "county_a": "MM",
+          "locality": "Hacienda Guadalupe",
+          "locality_gid": "whosonfirst:locality:1193252975",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Hacienda Guadalupe, NLE, Mexico"
+        },
+        "bbox": [
+          -99.84089,
+          25.15188,
+          -99.80089,
+          25.19188
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.94102,
+            30.61866
+          ]
+        },
+        "properties": {
+          "id": "1193150035",
+          "gid": "whosonfirst:locality:1193150035",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1193150035",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Baja California",
+          "region_gid": "whosonfirst:region:85686541",
+          "region_a": "BCN",
+          "county": "Ensenada",
+          "county_gid": "whosonfirst:county:102074509",
+          "county_a": "EN",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:1193150035",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe, BCN, Mexico"
+        },
+        "bbox": [
+          -115.96102,
+          30.59866,
+          -115.92102,
+          30.63866
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -92.45739,
+            15.95012
+          ]
+        },
+        "properties": {
+          "id": "1193135197",
+          "gid": "whosonfirst:locality:1193135197",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1193135197",
+          "name": "Guadalupe Maravillas",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Chiapas",
+          "region_gid": "whosonfirst:region:85686611",
+          "region_a": "CHP",
+          "county": "La Concordia",
+          "county_gid": "whosonfirst:county:102075595",
+          "county_a": "CR",
+          "locality": "Guadalupe Maravillas",
+          "locality_gid": "whosonfirst:locality:1193135197",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe Maravillas, CHP, Mexico"
+        },
+        "bbox": [
+          -92.47739,
+          15.93012,
+          -92.43739,
+          15.97012
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -104.84888,
+            27.32808
+          ]
+        },
+        "properties": {
+          "id": "1193134949",
+          "gid": "whosonfirst:locality:1193134949",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1193134949",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Chihuahua",
+          "region_gid": "whosonfirst:region:85686581",
+          "region_a": "CHH",
+          "county": "Jiménez",
+          "county_gid": "whosonfirst:county:102075293",
+          "county_a": "JI",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:1193134949",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe, CHH, Mexico"
+        },
+        "bbox": [
+          -104.86888,
+          27.30808,
+          -104.82888,
+          27.34808
+        ]
+      }
+    ],
+    "bbox": [
+      -115.96102,
+      15.93012,
+      -92.43739,
+      30.63866
+    ]
+  }
+}

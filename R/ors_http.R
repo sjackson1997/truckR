@@ -47,11 +47,9 @@ numeric_option <- function(name, default, positive = TRUE, whole = FALSE) {
 
 #' The web address of an ORS service
 #'
-#' ORS moved its public API from api.openrouteservice.org (deprecated since
-#' April 2026, restricted to 10 percent of the quota, and to be shut down in
-#' early November 2026) to api.heigit.org, where each service has its own
-#' address: routing under /openrouteservice and geocoding under /pelias/v1.
-#' Both are settings so a self-hosted server can be used, for example
+#' The public API is at api.heigit.org, where each service has its own address:
+#' routing under /openrouteservice and geocoding under /pelias/v1. Both are
+#' settings so a self-hosted server can be used, for example
 #' \code{options(truckr.ors_directions_url = "http://localhost:8080/ors")}.
 #' @noRd
 ors_service_url <- function(kind = c("directions", "geocode")) {

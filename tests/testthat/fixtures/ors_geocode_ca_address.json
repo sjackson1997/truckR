@@ -1,0 +1,111 @@
+{
+  "_note": "Live: a well-known Canadian street address on the address layer.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2989,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "290 Bremner Blvd, Toronto, ON, M5V 3L9",
+        "size": 3,
+        "layers": [
+          "address"
+        ],
+        "private": false,
+        "boundary.country": [
+          "CAN"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "housenumber": "290",
+          "street": "bremner blvd",
+          "city": "toronto",
+          "state": "on",
+          "postalcode": "m5v 3l9"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333129960
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -79.387089,
+            43.642596
+          ]
+        },
+        "properties": {
+          "id": "way/32742038",
+          "gid": "openstreetmap:address:way/32742038",
+          "layer": "address",
+          "source": "openstreetmap",
+          "source_id": "way/32742038",
+          "name": "290 Bremner Boulevard",
+          "housenumber": "290",
+          "street": "Bremner Boulevard",
+          "postalcode": "M5V 3L9",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "point",
+          "country": "Canada",
+          "country_gid": "whosonfirst:country:85633041",
+          "country_a": "CAN",
+          "region": "Ontario",
+          "region_gid": "whosonfirst:region:85682057",
+          "region_a": "ON",
+          "county": "Toronto",
+          "county_gid": "whosonfirst:county:890457465",
+          "locality": "Toronto",
+          "locality_gid": "whosonfirst:locality:101735835",
+          "borough": "Old Toronto",
+          "borough_gid": "whosonfirst:borough:1108833321",
+          "neighbourhood": "Waterfront Communities-The Island",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:1108906345",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "290 Bremner Boulevard, Toronto, ON, Canada",
+          "addendum": {
+            "osm": {
+              "wheelchair": "yes",
+              "wikidata": "Q134883",
+              "wikipedia": "en:CN Tower",
+              "website": "https://www.cntower.ca/",
+              "phone": "+1416-868-6937",
+              "opening_hours": "Mo-Su 09:00-22:00"
+            }
+          }
+        }
+      }
+    ],
+    "bbox": [
+      -79.387089,
+      43.642596,
+      -79.387089,
+      43.642596
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan implements Phase 1 from `design.md`. Tasks are ordered so that the pure logic (no network, no API quota) is built and tested first, then the provider plumbing, then live API work, which is kept to a minimum because the ORS free quota is limited: 2,000 directions per 24 hours measured on `api.heigit.org` (the deprecated address allowed only 200), and a geocoding limit not yet measured (see Risk 2 in the design).
+This plan implements Phase 1 from `design.md`. Tasks are ordered so that the pure logic (no network, no API quota) is built and tested first, then the provider plumbing, then live API work, which is kept to a minimum because the ORS free quota is limited: 2,000 directions per 24 hours measured on `api.heigit.org`, and 3,000 geocoding requests per 24 hours (see Risk 2 in the design).
 
 Working rules for every task:
 
@@ -84,19 +84,19 @@ Working rules for every task:
 
 - [x] 9. Implement ORS `route_segment()` with mocked tests
   - POST to `/openrouteservice/v2/directions/driving-hgv` on `api.heigit.org` with `[lon, lat]` ordering and geometry and instructions switched off; return `distance_m`, `duration_s` and any error message (HTTP error text parsed from the response body), plus `error_permanent` and `error_kind`. Coordinates are checked by `lonlat_vector()`, which uses names when present and rejects out-of-range values (the usual sign of a latitude/longitude swap).
-  - Change of plan found here: `api.openrouteservice.org` is deprecated (10 percent quota, shutdown 2 to 6 November 2026), so the default addresses moved to `api.heigit.org` (directions under `/openrouteservice`, geocoding under `/pelias/v1`), as settings (`truckr.ors_directions_url`, `truckr.ors_geocode_url`). Requirement 6.6.
-  - Three response fixtures captured live from `api.heigit.org` under `tests/testthat/fixtures/`: success, a point with no road nearby (404, ORS code 2010) and a route over the length limit (400, ORS code 2004, 6,000 km). All three were first captured on the old address and then captured again on the new one, so six directions requests were used in total: three against the old address's 200-a-day limit and three against the new address's 2,000-a-day limit.
+  - Service addresses: the package uses only `api.heigit.org` (directions under `/openrouteservice`, geocoding under `/pelias/v1`), as settings (`truckr.ors_directions_url`, `truckr.ors_geocode_url`). ORS's earlier address is retired and not supported (history note in the design). Requirement 6.6.
+  - Three response fixtures captured live from `api.heigit.org` under `tests/testthat/fixtures/`: success, a point with no road nearby (404, ORS code 2010) and a route over the length limit (400, ORS code 2004, 6,000 km). Three directions requests were used.
   - Tests parse the fixtures, confirm the request body byte for byte, confirm unit handling, and confirm how each result is cached.
   - Done when: parsing tests pass offline and fixtures are committed with no key or personal data in them (checked: the key does not appear in any fixture). Requirement 6.7.
   - _Requirements: 6.1, 6.2, 6.3, 6.6, 6.7_
 
-- [ ] 10. Implement ORS `geocode()` strategy and test street addresses and Canadian postal codes
-  - Implement the provider-owned strategy from the design: street address first (accepted only at address level, otherwise flagged fallback); US zip via the postal-code layer; Mexican and Canadian locations via city, state and country; Mexican zip-only locations return a failed location with the reason "zip-only location not supported by this provider" and are never sent as free-text searches.
-  - Validate each result (layer and returned region/country must match the expected state and country) instead of trusting `confidence`; mismatches are flagged in `geocode_flag`.
-  - LIVE (budget: about 15 geocoding requests): test a handful of US, Mexican and Canadian street addresses and a few Canadian postal codes from `df_route_samples` (for example `L8E 2B4`), and record what works in the "Spike results" section of `design.md`. Save a few fixtures for offline tests.
-  - Tests: strategy selection for each component combination, fallback flagging, zip-only Mexican failure, and validation mismatch, all offline.
+- [x] 10. Implement ORS `geocode()` strategy and test street addresses and Canadian postal codes
+  - Implemented the provider-owned strategy (`R/ors_geocode.R`): street address, then postal code (US and Canada only), then city with state; Mexican zip-only locations return a failed location with the reason "zip-only location not supported by this provider" and Mexican postal codes are never sent. Mexican cities are searched with the full state name, translated from the code in the data (`R/states.R`, all 32 states and their common abbreviations), with a second lookup of the city name alone checked against the state.
+  - Every candidate is judged instead of trusting `confidence` (exact match, right layer, right name, right country, state not provably different), and a candidate that fails is rejected with the reason (Requirements 14.6 and 14.14). This is stricter than the earlier plan to flag mismatches, because the live tests found exact, confidence-1 matches in the wrong state.
+  - LIVE: 22 geocoding requests on `api.heigit.org` (budget was about 15; the limit there is 3,000 a day, measured). Findings and the saved fixtures (`ors_geocode_*.json`) are in the design under "ORS geocoding as built". Canadian postal codes work; Mexican postal codes do not; street addresses work in all three countries.
+  - Tests (offline, using the live fixtures): strategy selection for each combination of components, request contents, fallback flagging, Mexican zip refusal and that a Mexican zip is never sent, state names and codes, ambiguity, wrong-state and wrong-name rejection, failures of the request passed through without a coarser fallback, and how each result is cached.
   - Done when: offline tests pass and the live findings are written into the design document.
-  - _Requirements: 6.4, 14.1, 14.2, 14.5, 14.6, 14.8, 14.9, 14.10_
+  - _Requirements: 6.4, 14.1, 14.2, 14.5, 14.6, 14.8, 14.9, 14.10, 14.14_
 
 - [ ] 11. Implement the quota pre-flight and graceful stop
   - Before routing, count the segments that are not already cached (an entry older than 120 days counts as not cached) and compare against the remaining quota (from the last seen headers, or a conservative default); report the numbers up front with `message()`.
@@ -122,7 +122,7 @@ Working rules for every task:
 
 - [ ] 14. Documentation and release hygiene
   - Complete roxygen documentation (`@param`, `@return`, `@examples` wrapped in `\dontrun{}` for anything needing the API) for every new exported function.
-  - Add a short `README` section showing key setup (`.Renviron`), a basic `route()` call, and a waypoint example.
+  - Add a short `README` section showing key setup (`.Renviron`), a basic `route()` call, and a waypoint example, plus a note that ORS results are licensed CC-BY-SA 4.0 with the attribution "openrouteservice.org | OpenStreetMap contributors", which matters if results are shared outside the company.
   - Run `devtools::document()` and `devtools::check()`; confirm no new warnings or notes.
   - Update `TODO_package_plan.md` to remove the items that are now done and reflect the new priorities.
   - Rebuild and reinstall into the global library so `library(truckR)` has the new functions; run `renv::snapshot(dev = TRUE)`.
@@ -189,6 +189,6 @@ Notes on the graph: Tasks 2, 3 and 5 can start in any order once Task 1 is done.
 - **Waves are about dependencies only:** the waves above describe what is technically possible in parallel. They do not replace the review checkpoints below or the live-quota rules, so tasks are still done one at a time, and the live tasks (9, 10 and 13) should never run at the same time because they share one daily quota.
 - **Status convention:** a task is marked `[x]` only when its "Done when" condition has been met and the work is committed on the `phase1-routing` branch.
 - **renv and dev dependencies:** this project's renv ignores Suggests by default. Always snapshot with `renv::snapshot(dev = TRUE)` or `testthat` will drop out of `renv.lock`. `devtools` and `roxygen2` are developer tools and are intentionally not locked; install them separately when developing.
-- **Live quota:** the ORS free quota (2,000 directions per 24 hours on `api.heigit.org`; the geocoding limit is to be measured in Task 10) is shared by all live tasks. Always use `api.heigit.org`: the old address has a tenth of the quota and is being shut down. Check the remaining quota before each live task (9, 10 and 13) and prefer saved fixtures over repeat calls.
-- **Open question (before Task 10 goes live):** ORS's terms of use on storing geocoding and routing results have not been checked. If they restrict storage, the disk cache default (design, Component 8) or the geocode cache may need limits. Route distances and geocodes are separate questions. Check the terms before the disk cache is used with live data.
+- **Live quota:** the ORS free quota (2,000 directions per 24 hours on `api.heigit.org`; 3,000 geocoding requests per 24 hours, both measured) is shared by all live tasks. Check the remaining quota before each live task (9, 10 and 13) and prefer saved fixtures over repeat calls.
+- **ORS terms on storing results (checked in Task 10, partly):** an ORS team member answered on their forum (27 August 2026) that, as long as the Terms of Service are followed, results may be stored and used as one pleases; they also warned that the same query can give a different result after an update to ORS or its data, which supports the 120-day refresh. Another thread says results are licensed CC-BY-SA 4.0 (attribution: "openrouteservice.org | OpenStreetMap contributors"). The formal Terms of Service page was not read, so this is a forum answer, not a legal opinion. The disk cache stays on by default. If results are shared outside the company, the attribution and share-alike terms may apply; Task 14 adds a short note to the README.
 - **Spec changes during build:** when a task reveals something that changes the design (a live finding, a decision), update `design.md` or `requirements.md` in the same commit as the code so the documents never drift from the implementation.

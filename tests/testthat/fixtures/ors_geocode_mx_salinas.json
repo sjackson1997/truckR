@@ -1,0 +1,306 @@
+{
+  "_note": "Live: Mexican city with state code NL.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2994,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Salinas Victoria, NL",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "pelias",
+        "parsed_text": {
+          "subject": "Salinas Victoria",
+          "locality": "Salinas Victoria",
+          "region": "NL",
+          "admin": "NL"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333122441
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -104.650288,
+            24.026912
+          ]
+        },
+        "properties": {
+          "id": "101994335",
+          "gid": "whosonfirst:locality:101994335",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101994335",
+          "name": "Durango",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Durango",
+          "region_gid": "whosonfirst:region:85686573",
+          "region_a": "DUR",
+          "county": "Durango",
+          "county_gid": "whosonfirst:county:102075159",
+          "locality": "Durango",
+          "locality_gid": "whosonfirst:locality:101994335",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Durango, Mexico",
+          "addendum": {
+            "concordances": {
+              "fct:id": "01af3b76-8f76-11e1-848f-cfd5bf3ef515",
+              "gn:id": 4011743,
+              "gp:id": 118385,
+              "qs_pg:id": 848594,
+              "wd:id": "Q112813",
+              "wk:page": "Durango City"
+            }
+          }
+        },
+        "bbox": [
+          -104.720678351,
+          23.9631692417,
+          -104.575887056,
+          24.0822907419
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.146791,
+            23.743943
+          ]
+        },
+        "properties": {
+          "id": "102000959",
+          "gid": "whosonfirst:locality:102000959",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "102000959",
+          "name": "Ciudad Victoria",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Tamaulipas",
+          "region_gid": "whosonfirst:region:85686695",
+          "region_a": "TAM",
+          "county": "Victoria",
+          "county_gid": "whosonfirst:county:102078881",
+          "locality": "Ciudad Victoria",
+          "locality_gid": "whosonfirst:locality:102000959",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Ciudad Victoria, TAM, Mexico",
+          "addendum": {
+            "concordances": {
+              "gn:id": 3530580,
+              "gp:id": 116572,
+              "qs_pg:id": 221602,
+              "wd:id": "Q331661",
+              "wk:page": "Ciudad Victoria"
+            }
+          }
+        },
+        "bbox": [
+          -99.1945563374,
+          23.6946499294,
+          -99.0920922361,
+          23.7873435737
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.09477,
+            19.66658
+          ]
+        },
+        "properties": {
+          "id": "1293083305",
+          "gid": "whosonfirst:locality:1293083305",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1293083305",
+          "name": "San Pablo de las Salinas",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "México",
+          "region_gid": "whosonfirst:region:85686527",
+          "region_a": "MEX",
+          "county": "Tultitlán",
+          "county_gid": "whosonfirst:county:102074003",
+          "locality": "San Pablo de las Salinas",
+          "locality_gid": "whosonfirst:locality:1293083305",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "San Pablo de las Salinas, MEX, Mexico",
+          "addendum": {
+            "concordances": {
+              "gn:id": 3518135,
+              "wk:page": "San_Pablo_de_las_Salinas"
+            }
+          }
+        },
+        "bbox": [
+          -99.11477,
+          19.64658,
+          -99.07477,
+          19.68658
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -102.985798,
+            22.645343
+          ]
+        },
+        "properties": {
+          "id": "101992283",
+          "gid": "whosonfirst:locality:101992283",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101992283",
+          "name": "Jerez de García Salinas",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Zacatecas",
+          "region_gid": "whosonfirst:region:85686567",
+          "region_a": "ZAC",
+          "county": "Jerez",
+          "county_gid": "whosonfirst:county:102075389",
+          "locality": "Jerez de García Salinas",
+          "locality_gid": "whosonfirst:locality:101992283",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Jerez de García Salinas, ZAC, Mexico",
+          "addendum": {
+            "concordances": {
+              "fct:id": "01b8739e-8f76-11e1-848f-cfd5bf3ef515",
+              "gn:id": 4004024,
+              "gp:id": 125809,
+              "qs_pg:id": 151368,
+              "wd:id": "Q2225397",
+              "wk:page": "Jerez de García Salinas"
+            }
+          }
+        },
+        "bbox": [
+          -103.01340267,
+          22.6195360741,
+          -102.957815708,
+          22.6733726415
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -101.712363,
+            22.625908
+          ]
+        },
+        "properties": {
+          "id": "101996479",
+          "gid": "whosonfirst:locality:101996479",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101996479",
+          "name": "Salinas de Hidalgo",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "San Luis Potosí",
+          "region_gid": "whosonfirst:region:85686647",
+          "region_a": "SLP",
+          "county": "Salinas",
+          "county_gid": "whosonfirst:county:102077201",
+          "locality": "Salinas de Hidalgo",
+          "locality_gid": "whosonfirst:locality:101996479",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Salinas de Hidalgo, SLP, Mexico",
+          "addendum": {
+            "concordances": {
+              "fct:id": "01b8edd8-8f76-11e1-848f-cfd5bf3ef515",
+              "gn:id": 3988169,
+              "gp:id": 141192,
+              "wd:id": "Q1997557",
+              "wk:page": "Salinas de Hidalgo"
+            }
+          }
+        },
+        "bbox": [
+          -101.729231917,
+          22.6006731029,
+          -101.693930979,
+          22.6409156118
+        ]
+      }
+    ],
+    "bbox": [
+      -104.720678351,
+      19.64658,
+      -99.07477,
+      24.0822907419
+    ]
+  }
+}

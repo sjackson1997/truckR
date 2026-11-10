@@ -1,0 +1,50 @@
+{
+  "_note": "Live: Mexican postal code on the postalcode layer.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2993,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "45134",
+        "size": 3,
+        "layers": [
+          "postalcode"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "pelias",
+        "parsed_text": {
+          "subject": "45134",
+          "postcode": "45134"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333123881
+    },
+    "type": "FeatureCollection",
+    "features": []
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "_note": "Live: Salinas Victoria with the full state name Nuevo Leon.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2984,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Salinas Victoria, Nuevo Leon",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "salinas victoria",
+          "state": "nuevo leon"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333192033
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -100.8,
+            25.96667
+          ]
+        },
+        "properties": {
+          "id": "1343922941",
+          "gid": "whosonfirst:locality:1343922941",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1343922941",
+          "name": "Salinas Victoria",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Nuevo León",
+          "region_gid": "whosonfirst:region:85686681",
+          "region_a": "NLE",
+          "county": "Mina",
+          "county_gid": "whosonfirst:county:102078741",
+          "county_a": "MI",
+          "locality": "Salinas Victoria",
+          "locality_gid": "whosonfirst:locality:1343922941",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Salinas Victoria, NLE, Mexico"
+        },
+        "bbox": [
+          -100.82,
+          25.94667,
+          -100.78,
+          25.98667
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -100.29239,
+            25.964591
+          ]
+        },
+        "properties": {
+          "id": "102000665",
+          "gid": "whosonfirst:locality:102000665",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "102000665",
+          "name": "Salinas Victoria",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Nuevo León",
+          "region_gid": "whosonfirst:region:85686681",
+          "region_a": "NLE",
+          "county": "Salinas Victoria",
+          "county_gid": "whosonfirst:county:102078697",
+          "county_a": "SV",
+          "locality": "Salinas Victoria",
+          "locality_gid": "whosonfirst:locality:102000665",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Salinas Victoria, NLE, Mexico"
+        },
+        "bbox": [
+          -100.309075112,
+          25.9507040144,
+          -100.276792603,
+          25.9808921217
+        ]
+      }
+    ],
+    "bbox": [
+      -100.82,
+      25.94667,
+      -100.276792603,
+      25.98667
+    ]
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "_note": "Live: Guadalupe with the full state name Nuevo Leon.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2986,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Guadalupe, Nuevo Leon",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "guadalupe",
+          "state": "nuevo leon"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333189348
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -101.672015,
+            21.127738
+          ]
+        },
+        "properties": {
+          "id": "101996837",
+          "gid": "whosonfirst:locality:101996837",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101996837",
+          "name": "León",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Guanajuato",
+          "region_gid": "whosonfirst:region:85686629",
+          "region_a": "GUA",
+          "county": "León",
+          "county_gid": "whosonfirst:county:102077349",
+          "county_a": "LE",
+          "locality": "León",
+          "locality_gid": "whosonfirst:locality:101996837",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "León, GUA, Mexico"
+        },
+        "bbox": [
+          -101.770234211,
+          21.0304049532,
+          -101.561788878,
+          21.2134292733
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -103.47698,
+            25.60187
+          ]
+        },
+        "properties": {
+          "id": "1344145431",
+          "gid": "whosonfirst:locality:1344145431",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1344145431",
+          "name": "Leon",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Durango",
+          "region_gid": "whosonfirst:region:85686573",
+          "region_a": "DUR",
+          "county": "Gómez Palacio",
+          "county_gid": "whosonfirst:county:102075131",
+          "county_a": "GO",
+          "locality": "Leon",
+          "locality_gid": "whosonfirst:locality:1344145431",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Leon, DUR, Mexico"
+        },
+        "bbox": [
+          -103.49698,
+          25.58187,
+          -103.45698,
+          25.62187
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -113.78333,
+            28.51667
+          ]
+        },
+        "properties": {
+          "id": "1243180097",
+          "gid": "whosonfirst:locality:1243180097",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1243180097",
+          "name": "Leon",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Baja California",
+          "region_gid": "whosonfirst:region:85686541",
+          "region_a": "BCN",
+          "county": "Ensenada",
+          "county_gid": "whosonfirst:county:102074509",
+          "county_a": "EN",
+          "locality": "Leon",
+          "locality_gid": "whosonfirst:locality:1243180097",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Leon, BCN, Mexico"
+        },
+        "bbox": [
+          -113.80333,
+          28.49667,
+          -113.76333,
+          28.53667
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -107.63333,
+            30.71667
+          ]
+        },
+        "properties": {
+          "id": "1209911755",
+          "gid": "whosonfirst:locality:1209911755",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1209911755",
+          "name": "El Leon",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Chihuahua",
+          "region_gid": "whosonfirst:region:85686581",
+          "region_a": "CHH",
+          "county": "Nuevo Casas Grandes",
+          "county_gid": "whosonfirst:county:102075227",
+          "county_a": "NU",
+          "locality": "El Leon",
+          "locality_gid": "whosonfirst:locality:1209911755",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "El Leon, CHH, Mexico"
+        },
+        "bbox": [
+          -107.65333,
+          30.69667,
+          -107.61333,
+          30.73667
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -100.66178,
+            22.50641
+          ]
+        },
+        "properties": {
+          "id": "1125940069",
+          "gid": "whosonfirst:locality:1125940069",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1125940069",
+          "name": "El León",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "San Luis Potosí",
+          "region_gid": "whosonfirst:region:85686647",
+          "region_a": "SLP",
+          "county": "Villa Hidalgo",
+          "county_gid": "whosonfirst:county:102077141",
+          "county_a": "VH",
+          "locality": "El León",
+          "locality_gid": "whosonfirst:locality:1125940069",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "El León, SLP, Mexico"
+        },
+        "bbox": [
+          -100.68178,
+          22.48641,
+          -100.64178,
+          22.52641
+        ]
+      }
+    ],
+    "bbox": [
+      -113.80333,
+      21.0304049532,
+      -100.64178,
+      30.73667
+    ]
+  }
+}

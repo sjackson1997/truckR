@@ -1,0 +1,142 @@
+{
+  "_note": "Live: Canadian city and province, several city layers.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2997,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Stoney Creek, ON",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "CAN"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "stoney creek",
+          "state": "on"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333117817
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -82.277751,
+            43.026001
+          ]
+        },
+        "properties": {
+          "id": "85875559",
+          "gid": "whosonfirst:neighbourhood:85875559",
+          "layer": "neighbourhood",
+          "source": "whosonfirst",
+          "source_id": "85875559",
+          "name": "Bright's Grove",
+          "confidence": 0.6,
+          "match_type": "fallback",
+          "accuracy": "centroid",
+          "country": "Canada",
+          "country_gid": "whosonfirst:country:85633041",
+          "country_a": "CAN",
+          "region": "Ontario",
+          "region_gid": "whosonfirst:region:85682057",
+          "region_a": "ON",
+          "locality": "Sarnia",
+          "locality_gid": "whosonfirst:locality:101736007",
+          "neighbourhood": "Bright's Grove",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:85875559",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Bright's Grove, Sarnia, ON, Canada"
+        },
+        "bbox": [
+          -82.282751,
+          43.021001,
+          -82.272751,
+          43.031001
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -81.239696,
+            43.045278
+          ]
+        },
+        "properties": {
+          "id": "85874941",
+          "gid": "whosonfirst:neighbourhood:85874941",
+          "layer": "neighbourhood",
+          "source": "whosonfirst",
+          "source_id": "85874941",
+          "name": "Stoney Creek",
+          "confidence": 0.6,
+          "match_type": "fallback",
+          "accuracy": "centroid",
+          "country": "Canada",
+          "country_gid": "whosonfirst:country:85633041",
+          "country_a": "CAN",
+          "region": "Ontario",
+          "region_gid": "whosonfirst:region:85682057",
+          "region_a": "ON",
+          "county": "Middlesex",
+          "county_gid": "whosonfirst:county:890457469",
+          "locality": "London",
+          "locality_gid": "whosonfirst:locality:101735809",
+          "neighbourhood": "Stoney Creek",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:85874941",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Stoney Creek, London, ON, Canada"
+        },
+        "bbox": [
+          -81.244696,
+          43.040278,
+          -81.234696,
+          43.050278
+        ]
+      }
+    ],
+    "bbox": [
+      -82.282751,
+      43.021001,
+      -81.234696,
+      43.050278
+    ]
+  }
+}

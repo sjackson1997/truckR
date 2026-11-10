@@ -1,0 +1,101 @@
+{
+  "_note": "Live: Guadalupe is a very common place name in Mexico; NL is Nuevo Leon.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2995,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Guadalupe, NL",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "guadalupe",
+          "state": "nl"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333120873
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.74253,
+            27.62669
+          ]
+        },
+        "properties": {
+          "id": "1260231999",
+          "gid": "whosonfirst:locality:1260231999",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1260231999",
+          "name": "Guadalupe",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Tamaulipas",
+          "region_gid": "whosonfirst:region:85686695",
+          "region_a": "TAM",
+          "county": "Nuevo Laredo",
+          "county_gid": "whosonfirst:county:102078877",
+          "county_a": "NL",
+          "locality": "Guadalupe",
+          "locality_gid": "whosonfirst:locality:1260231999",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Guadalupe, TAM, Mexico"
+        },
+        "bbox": [
+          -99.76253,
+          27.60669,
+          -99.72253,
+          27.64669
+        ]
+      }
+    ],
+    "bbox": [
+      -99.76253,
+      27.60669,
+      -99.72253,
+      27.64669
+    ]
+  }
+}

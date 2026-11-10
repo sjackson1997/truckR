@@ -1,0 +1,187 @@
+{
+  "_note": "Live: a US city name used in many states, with the state abbreviation.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2981,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Springfield, IL",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "USA"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "springfield",
+          "state": "il"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333196600
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -89.695743,
+            39.860743
+          ]
+        },
+        "properties": {
+          "id": "404498567",
+          "gid": "whosonfirst:localadmin:404498567",
+          "layer": "localadmin",
+          "source": "whosonfirst",
+          "source_id": "404498567",
+          "name": "Springfield Township",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "Illinois",
+          "region_gid": "whosonfirst:region:85688697",
+          "region_a": "IL",
+          "county": "Sangamon County",
+          "county_gid": "whosonfirst:county:102083527",
+          "county_a": "SM",
+          "localadmin": "Springfield Township",
+          "localadmin_gid": "whosonfirst:localadmin:404498567",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Springfield Township, IL, USA"
+        },
+        "bbox": [
+          -89.711746,
+          39.787344,
+          -89.593875,
+          39.874283
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -89.695816,
+            39.860743
+          ]
+        },
+        "properties": {
+          "id": "1729438673",
+          "gid": "whosonfirst:locality:1729438673",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "1729438673",
+          "name": "Springfield",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "Illinois",
+          "region_gid": "whosonfirst:region:85688697",
+          "region_a": "IL",
+          "county": "Sangamon County",
+          "county_gid": "whosonfirst:county:102083527",
+          "county_a": "SM",
+          "localadmin": "Springfield Township",
+          "localadmin_gid": "whosonfirst:localadmin:404498567",
+          "locality": "Springfield",
+          "locality_gid": "whosonfirst:locality:1729438673",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Springfield, IL, USA"
+        },
+        "bbox": [
+          -89.711746,
+          39.787344,
+          -89.593875,
+          39.874283
+        ]
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -89.645547,
+            39.797328
+          ]
+        },
+        "properties": {
+          "id": "85940429",
+          "gid": "whosonfirst:locality:85940429",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "85940429",
+          "name": "Springfield",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "Illinois",
+          "region_gid": "whosonfirst:region:85688697",
+          "region_a": "IL",
+          "county": "Sangamon County",
+          "county_gid": "whosonfirst:county:102083527",
+          "county_a": "SM",
+          "localadmin": "Capital Township",
+          "localadmin_gid": "whosonfirst:localadmin:404499865",
+          "locality": "Springfield",
+          "locality_gid": "whosonfirst:locality:85940429",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Springfield, IL, USA"
+        },
+        "bbox": [
+          -89.773193,
+          39.653656,
+          -89.568389,
+          39.874159
+        ]
+      }
+    ],
+    "bbox": [
+      -89.773193,
+      39.653656,
+      -89.568389,
+      39.874283
+    ]
+  }
+}

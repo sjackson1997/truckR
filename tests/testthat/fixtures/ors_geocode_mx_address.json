@@ -1,0 +1,146 @@
+{
+  "_note": "Live: a well-known Mexican street address on the address layer.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2988,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Paseo de la Reforma 222, Ciudad de Mexico",
+        "size": 3,
+        "layers": [
+          "address"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "street": "paseo de la reforma",
+          "housenumber": "222",
+          "city": "ciudad de mexico"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333131477
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.161597,
+            19.428824
+          ]
+        },
+        "properties": {
+          "id": "node/7556253520",
+          "gid": "openstreetmap:address:node/7556253520",
+          "layer": "address",
+          "source": "openstreetmap",
+          "source_id": "node/7556253520",
+          "name": "222 Paseo De La Reforma",
+          "housenumber": "222",
+          "street": "Paseo De La Reforma",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "point",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Ciudad de México",
+          "region_gid": "whosonfirst:region:85686515",
+          "region_a": "DF",
+          "county": "Benito Juárez",
+          "county_gid": "whosonfirst:county:102073737",
+          "county_a": "BJ",
+          "locality": "Mexico City",
+          "locality_gid": "whosonfirst:locality:857683023",
+          "borough": "Cuauhtémoc",
+          "borough_gid": "whosonfirst:borough:890535757",
+          "neighbourhood": "Juarez",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:85884469",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "222 Paseo De La Reforma, Mexico City, DF, Mexico",
+          "addendum": {
+            "osm": {
+              "brand": "Eutelsat",
+              "website": "http://www.eutelsat.com"
+            }
+          }
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -99.162215,
+            19.429039
+          ]
+        },
+        "properties": {
+          "id": "mx/countrywide-addresses-country:bd2402f24d132c51",
+          "gid": "openaddresses:address:mx/countrywide-addresses-country:bd2402f24d132c51",
+          "layer": "address",
+          "source": "openaddresses",
+          "source_id": "mx/countrywide-addresses-country:bd2402f24d132c51",
+          "name": "222 Avenida Paseo De La Reforma",
+          "housenumber": "222",
+          "street": "Avenida Paseo De La Reforma",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "point",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Ciudad de México",
+          "region_gid": "whosonfirst:region:85686515",
+          "region_a": "DF",
+          "county": "Benito Juárez",
+          "county_gid": "whosonfirst:county:102073737",
+          "county_a": "BJ",
+          "locality": "Mexico City",
+          "locality_gid": "whosonfirst:locality:857683023",
+          "borough": "Cuauhtémoc",
+          "borough_gid": "whosonfirst:borough:890535757",
+          "neighbourhood": "Juarez",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:85884469",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "222 Avenida Paseo De La Reforma, Mexico City, DF, Mexico"
+        }
+      }
+    ],
+    "bbox": [
+      -99.162215,
+      19.428824,
+      -99.161597,
+      19.429039
+    ]
+  }
+}

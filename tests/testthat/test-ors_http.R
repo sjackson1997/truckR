@@ -552,7 +552,7 @@ test_that("geocoding and directions requests share the spacing", {
 
 test_that("the key is removed from a network error message, the retry notice and the result", {
   leaky <- paste0(
-    "Failed to connect to api.openrouteservice.org: GET https://api.openrouteservice.org/geocode/search?api_key=",
+    "Failed to connect to api.heigit.org: GET https://api.heigit.org/pelias/v1/search?api_key=",
     ors_test_key, "&text=Laredo"
   )
   local_ors(rep(list(raw_network(leaky)), 3))

@@ -1,0 +1,101 @@
+{
+  "_note": "Live: Zapopan with the full state name Jalisco.",
+  "status": 200,
+  "headers": {
+    "limit": 3000,
+    "remaining": 2985,
+    "reset": 1794419515
+  },
+  "body": {
+    "geocoding": {
+      "version": "0.2",
+      "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+      "query": {
+        "text": "Zapopan, Jalisco",
+        "size": 5,
+        "layers": [
+          "locality",
+          "localadmin",
+          "borough",
+          "neighbourhood"
+        ],
+        "private": false,
+        "boundary.country": [
+          "MEX"
+        ],
+        "lang": {
+          "name": "English",
+          "iso6391": "en",
+          "iso6393": "eng",
+          "via": "default",
+          "defaulted": true
+        },
+        "querySize": 20,
+        "parser": "libpostal",
+        "parsed_text": {
+          "city": "zapopan",
+          "state": "jalisco"
+        }
+      },
+      "warnings": [
+        "Invalid Parameter: api_key"
+      ],
+      "engine": {
+        "name": "Pelias",
+        "author": "Mapzen",
+        "version": "1.0"
+      },
+      "timestamp": 1794333190512
+    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -103.431316,
+            20.701353
+          ]
+        },
+        "properties": {
+          "id": "101997877",
+          "gid": "whosonfirst:locality:101997877",
+          "layer": "locality",
+          "source": "whosonfirst",
+          "source_id": "101997877",
+          "name": "Zapopan",
+          "confidence": 1,
+          "match_type": "exact",
+          "accuracy": "centroid",
+          "country": "Mexico",
+          "country_gid": "whosonfirst:country:85633293",
+          "country_a": "MEX",
+          "region": "Jalisco",
+          "region_gid": "whosonfirst:region:85686603",
+          "region_a": "JAL",
+          "county": "Zapopan",
+          "county_gid": "whosonfirst:county:102074709",
+          "county_a": "ZP",
+          "locality": "Zapopan",
+          "locality_gid": "whosonfirst:locality:101997877",
+          "continent": "North America",
+          "continent_gid": "whosonfirst:continent:102191575",
+          "label": "Zapopan, JAL, Mexico"
+        },
+        "bbox": [
+          -103.486128,
+          20.584788,
+          -103.321834,
+          20.790614
+        ]
+      }
+    ],
+    "bbox": [
+      -103.486128,
+      20.584788,
+      -103.321834,
+      20.790614
+    ]
+  }
+}
