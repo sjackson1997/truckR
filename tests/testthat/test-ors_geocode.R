@@ -9,7 +9,7 @@ query_of <- function(log, i = 1) log$calls[[i]]$query
 
 city_layers_text <- "locality,localadmin,borough,neighbourhood"
 result_names <- c(
-  "lon", "lat", "match_layer", "label", "flag", "strategy",
+  "lon", "lat", "match_layer", "label", "flag", "doubtful", "strategy",
   "error", "error_permanent", "error_kind"
 )
 
@@ -82,8 +82,9 @@ test_that("a ZIP+4 is looked up by its first five digits", {
   expect_equal(query_of(log)$text, "78040")
 })
 
-test_that("a zip in the wrong state is rejected, not trusted", {
+test_that("in reject mode, a zip in the wrong state is refused", {
   local_ors(list(gfx("us_zip")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(zip = "78040", state = "OK", country = "USA"))
 
@@ -128,8 +129,9 @@ test_that("a candidate with the wrong name is skipped (Springfield Township is n
   expect_equal(got$match_layer, "locality")
 })
 
-test_that("a US city with no state is refused when the name is shared by several places", {
+test_that("in reject mode, a US city with no state is refused when the name is shared by several places", {
   local_ors(list(gfx("us_springfield")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   # Springfield, IL appears twice in the fixture at different coordinates.
   got <- ors_geocode(list(city = "Springfield", country = "USA"))
@@ -232,6 +234,7 @@ test_that("a postal code without its space is spaced before it is sent", {
 
 test_that("a truncated Canadian postal code is not sent", {
   log <- local_ors(list(gfx("ca_city")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "Stoney Creek", state = "ON", zip = "L8E", country = "CAN"))
 
@@ -240,8 +243,9 @@ test_that("a truncated Canadian postal code is not sent", {
   expect_match(got$error, "postal code 'L8E' is not a valid Canadian postal code and was ignored")
 })
 
-test_that("a city search that only finds approximate matches in other towns finds nothing", {
+test_that("in reject mode, a city search that only finds approximate matches in other towns finds nothing", {
   local_ors(list(gfx("ca_city")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "Stoney Creek", state = "ON", country = "CAN"))
 
@@ -352,8 +356,9 @@ test_that("an exact match in the wrong state is rejected (Guadalupe in Tamaulipa
   expect_length(log$calls, 2)
 })
 
-test_that("when no candidate can be confirmed in the state, nothing is returned", {
+test_that("in reject mode, when no candidate can be confirmed in the state, nothing is returned", {
   local_ors(list(gfx("mx_guadalupe_name"), gfx("mx_guadalupe_only")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "GUADALUPE", state = "DF", country = "MEX"))
 
@@ -362,8 +367,9 @@ test_that("when no candidate can be confirmed in the state, nothing is returned"
   expect_match(got$error, "is in NLE, not DF")
 })
 
-test_that("results with the wrong names are skipped even when they are 'exact'", {
+test_that("in reject mode, results with the wrong names are skipped even when they are 'exact'", {
   local_ors(list(gfx("mx_salinas"), gfx("mx_salinas")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "SALINAS VICTORIA", state = "NL", country = "MEX"))
 
@@ -371,8 +377,9 @@ test_that("results with the wrong names are skipped even when they are 'exact'",
   expect_match(got$error, "Durango, Mexico is not named SALINAS VICTORIA")
 })
 
-test_that("a Mexican city with no state is refused when several places share the name", {
+test_that("in reject mode, a Mexican city with no state is refused when several places share the name", {
   log <- local_ors(list(gfx("mx_zapopan_only")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "Zapopan", country = "MEX"))
 
@@ -383,8 +390,9 @@ test_that("a Mexican city with no state is refused when several places share the
   expect_match(got$error, "different places and no state was given")
 })
 
-test_that("an unrecognized state is ignored, and the note appears in the failure", {
+test_that("in reject mode, an unrecognized state is ignored, and the note appears in the failure", {
   log <- local_ors(list(gfx("mx_zapopan_only")))
+  withr::local_options(truckr.geocode_doubtful = "reject")
 
   got <- ors_geocode(list(city = "Zapopan", state = "XX", country = "MEX"))
 
@@ -523,6 +531,7 @@ test_that("each kind of result is cached the way the failure rules say", {
 
   cases <- list(
     success = list(list(gfx("us_zip")), list(zip = "78040", country = "USA"), "stored"),
+    doubtful = list(list(gfx("us_zip")), list(zip = "78040", state = "OK", country = "USA"), "stored"),
     no_match = list(list(raw_ok(list(features = list()))), list(zip = "78040", country = "USA"), "memory_only"),
     zip_only_mexico = list(list(), list(zip = "45134", country = "MEX"), "memory_only"),
     quota = list(list(raw_status(429, headers = limits(3000, 0))), list(zip = "78040", country = "USA"), "not_stored"),
@@ -582,4 +591,172 @@ test_that("the key never appears in a result", {
 
   expect_false(grepl(ors_test_key, paste(unlist(got), collapse = " "), fixed = TRUE))
   expect_false(any(grepl(ors_test_key, msgs, fixed = TRUE)))
+})
+
+# --- Doubtful results, marked CHECK (the default) ------------------------------------------------------------
+
+is_check <- function(flag) !is.na(flag) && grepl("^CHECK: may be the wrong place", flag)
+
+test_that("flag is the default way to treat a doubtful result", {
+  withr::local_options(truckr.geocode_doubtful = NULL)
+
+  expect_equal(ors_doubtful_mode(), "flag")
+  withr::local_options(truckr.geocode_doubtful = "reject")
+  expect_equal(ors_doubtful_mode(), "reject")
+  withr::local_options(truckr.geocode_doubtful = "sometimes")
+  expect_error(ors_doubtful_mode(), "must be \"flag\" or \"reject\"")
+})
+
+test_that("a zip in the wrong state is returned, marked CHECK with the reason", {
+  local_ors(list(gfx("us_zip")))
+
+  got <- ors_geocode(list(zip = "78040", state = "OK", country = "USA"))
+
+  expect_equal(c(got$lon, got$lat), fixture_point("us_zip"))
+  expect_true(got$doubtful)
+  expect_true(is_check(got$flag))
+  expect_match(got$flag, "ORS matched '78040, Laredo, TX, USA' \\(postalcode level\\)")
+  expect_match(got$flag, "is in TX, not OK")
+  expect_equal(got$strategy, "postal code (unconfirmed)")
+  expect_true(is.na(got$error))
+  expect_equal(got$error_kind, "ok")
+})
+
+test_that("a clean result is never marked", {
+  local_ors(list(gfx("us_zip")))
+
+  got <- ors_geocode(list(zip = "78040", state = "TX", country = "USA"))
+
+  expect_false(got$doubtful)
+  expect_true(is.na(got$flag))
+})
+
+test_that("a doubtful result is used only when no lookup gives a clean one", {
+  # The first city search finds Guadalupe in the wrong state (doubtful); the
+  # second finds the right one, so that is what is returned, unmarked.
+  local_ors(list(gfx("mx_guadalupe"), gfx("mx_guadalupe_only")))
+
+  got <- ors_geocode(list(city = "GUADALUPE", state = "NL", country = "MEX"))
+
+  expect_false(got$doubtful)
+  expect_equal(got$label, "Guadalupe, NLE, Mexico")
+  expect_false(grepl("CHECK", got$flag))
+})
+
+test_that("with a name shared by several places and no state, the first is returned and marked", {
+  local_ors(list(gfx("mx_zapopan_only")))
+
+  got <- ors_geocode(list(city = "Zapopan", country = "MEX"))
+
+  expect_equal(got$label, "Zapopan, JAL, Mexico")
+  expect_true(got$doubtful)
+  expect_match(got$flag, "is the first of 5 different places with this name, and no state was given")
+})
+
+test_that("Springfield with no state is marked, and is Springfield, not Springfield Township", {
+  local_ors(list(gfx("us_springfield")))
+
+  got <- ors_geocode(list(city = "Springfield", country = "USA"))
+
+  expect_equal(got$label, "Springfield, IL, USA")
+  expect_equal(got$match_layer, "locality")
+  expect_true(got$doubtful)
+})
+
+test_that("approximate matches in other towns are used as a last resort, the closest name first", {
+  local_ors(list(gfx("ca_city")))
+
+  got <- ors_geocode(list(city = "Stoney Creek", state = "ON", zip = "L8E", country = "CAN"))
+
+  # Two candidates: a differently named neighbourhood in Sarnia and a place
+  # called Stoney Creek in London. The name that matches is the less doubtful.
+  expect_equal(got$label, "Stoney Creek, London, ON, Canada")
+  expect_equal(c(got$lon, got$lat), fixture_point("ca_city", 2))
+  expect_true(got$doubtful)
+  expect_match(got$flag, "which is only an approximate match")
+  expect_false(grepl("is not named", got$flag))
+  expect_match(got$flag, "postal code 'L8E' is not a valid Canadian postal code and was ignored")
+})
+
+test_that("when no state can be confirmed, the least doubtful place is returned and says so", {
+  local_ors(list(gfx("mx_guadalupe_name"), gfx("mx_guadalupe_only")))
+
+  got <- ors_geocode(list(city = "GUADALUPE", state = "DF", country = "MEX"))
+
+  expect_true(got$doubtful)
+  expect_equal(got$strategy, "city name alone, checked against the state (unconfirmed)")
+  expect_match(got$flag, "is in a state that could not be confirmed as DF")
+})
+
+test_that("results with the wrong names are returned as a last resort and say so", {
+  local_ors(list(gfx("mx_salinas"), gfx("mx_salinas")))
+
+  got <- ors_geocode(list(city = "SALINAS VICTORIA", state = "NL", country = "MEX"))
+
+  expect_true(got$doubtful)
+  expect_match(got$flag, "is not named SALINAS VICTORIA")
+})
+
+test_that("an unrecognized state is noted along with the CHECK", {
+  local_ors(list(gfx("mx_zapopan_only")))
+
+  got <- ors_geocode(list(city = "Zapopan", state = "XX", country = "MEX"))
+
+  expect_true(got$doubtful)
+  expect_match(got$flag, "state 'XX' was not recognized and was ignored")
+  expect_true(grepl("CHECK", got$flag))
+})
+
+test_that("a place on the wrong level or in the wrong country is never returned, even in flag mode", {
+  # An address lookup that comes back as the city: wrong level, so no result.
+  local_ors(list(gfx("us_address_missing")))
+  got <- ors_geocode(list(street = "99999 Nowhere Road", state = "TX", country = "USA"))
+  expect_true(is.na(got$lon))
+  expect_false(got$doubtful)
+  expect_equal(got$error_kind, "no_match")
+
+  # A candidate in another country is ruled out too.
+  wrong_country <- raw_ok(list(features = list(list(
+    properties = list(layer = "postalcode", match_type = "exact", label = "78040, Somewhere, Canada",
+                      region_a = "ON", country_a = "CAN", name = "78040"),
+    geometry = list(coordinates = list(-79, 43))
+  ))))
+  local_ors(list(wrong_country))
+  got2 <- ors_geocode(list(zip = "78040", country = "USA"))
+  expect_true(is.na(got2$lon))
+  expect_match(got2$error, "is in CAN, not USA")
+})
+
+test_that("a doubtful result is stored in the cache with its flag, like any other found location", {
+  local_cache()
+  local_ors(list(gfx("us_zip")))
+  s <- cache_store("ors", "geocode")
+  loc <- list(zip = "78040", state = "OK", country = "USA")
+  key <- location_key(loc)
+
+  got <- ors_geocode(loc)
+  expect_equal(cache_put(s, key, got), "stored")
+  hit <- cache_get(s, key)
+
+  expect_true(hit$value$doubtful)
+  expect_true(is_check(hit$value$flag))
+  expect_equal(hit$value$lon, got$lon)
+})
+
+test_that("reject mode returns a failure for every kind of doubtful result", {
+  for (case in list(
+    list(gfx("us_zip"), list(zip = "78040", state = "OK", country = "USA")),
+    list(gfx("mx_zapopan_only"), list(city = "Zapopan", country = "MEX")),
+    list(gfx("us_springfield"), list(city = "Springfield", country = "USA")),
+    list(gfx("ca_city"), list(city = "Stoney Creek", state = "ON", country = "CAN"))
+  )) {
+    local_ors(list(case[[1]]))
+    withr::local_options(truckr.geocode_doubtful = "reject")   # after local_ors(), which resets it
+
+    got <- ors_geocode(case[[2]])
+
+    expect_true(is.na(got$lon))
+    expect_false(got$doubtful)
+    expect_equal(got$error_kind, "no_match")
+  }
 })

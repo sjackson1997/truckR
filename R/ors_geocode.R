@@ -15,13 +15,28 @@
 #     for the wrong state, and for a street in place of a zip). Results are
 #     judged instead by layer, match type, name, country and state.
 #
-# A wrong place is worse than no place, so a candidate is rejected unless it is
-# an exact match at the right level with the right name and, where both can be
-# recognized, the right state.
+# How a result is judged: every candidate is compared with what the lane says,
+# using only the details the geocoder returns (its name, state, level and
+# whether it is an "exact" or a "fallback" match). A candidate that passes every
+# check is accepted. One that fails a check but is on the right level and in the
+# right country is "doubtful": it is used only if no lookup in the chain gives a
+# clean result, and then it is returned marked "CHECK" with the reasons (or, with
+# the option truckr.geocode_doubtful = "reject", not returned at all).
 
 ors_city_layers <- c("locality", "localadmin", "borough", "neighbourhood")
 ors_supported_countries <- c("USA", "MEX", "CAN")
 ors_country_iso2 <- c(USA = "US", MEX = "MX", CAN = "CA")
+
+#' What to do with a doubtful result: "flag" (return it, marked CHECK) or
+#' "reject" (return a failure that says why)
+#' @noRd
+ors_doubtful_mode <- function() {
+  mode <- getOption("truckr.geocode_doubtful", "flag")
+  if (!is.character(mode) || length(mode) != 1 || is.na(mode) || !mode %in% c("flag", "reject")) {
+    stop("Option `truckr.geocode_doubtful` must be \"flag\" or \"reject\".", call. = FALSE)
+  }
+  mode
+}
 
 #' Geocode one location with ORS
 #'
@@ -43,12 +58,14 @@ ors_country_iso2 <- c(USA = "US", MEX = "MX", CAN = "CA")
 #'
 #' @return A list with \code{lon}, \code{lat}, \code{match_layer},
 #'   \code{label} (what ORS matched, for review), \code{flag} (\code{NA}, or a
-#'   note when the result is less precise or less certain than usual),
-#'   \code{strategy}, \code{error} (\code{NA} on success),
-#'   \code{error_permanent} and \code{error_kind}.
+#'   note when the result is less precise or less certain than usual; a note
+#'   that starts with "CHECK:" means the place may be wrong), \code{doubtful}
+#'   (\code{TRUE} for such a result), \code{strategy}, \code{error}
+#'   (\code{NA} on success), \code{error_permanent} and \code{error_kind}.
 #' @noRd
 ors_geocode <- function(location) {
   loc <- ors_location(location)
+  mode <- ors_doubtful_mode()
 
   if (!is.na(loc$lat) || !is.na(loc$lon)) {
     point <- lonlat_vector(c(lon = loc$lon, lat = loc$lat), "location")
@@ -76,6 +93,7 @@ ors_geocode <- function(location) {
   flags <- plan$notes
   missed <- character()
   rejected <- character()
+  doubtful <- list()
   for (step in plan$steps) {
     out <- ors_run_step(step)
     if (out$outcome == "error") {
@@ -91,12 +109,36 @@ ors_geocode <- function(location) {
     }
     missed <- c(missed, step$group)
     rejected <- c(rejected, out$notes)
+    for (candidate in out$doubtful) {
+      doubtful[[length(doubtful) + 1]] <- list(candidate = candidate, step = step)
+    }
   }
 
-  # The most useful reasons first: why a place was ruled out by its state, or
-  # was ambiguous, says more than that some other place had a different name.
+  # No lookup gave a clean result. Use the least doubtful candidate (lowest
+  # total weight of problems; the earlier, more precise lookup wins a tie),
+  # marked CHECK.
+  if (mode == "flag" && length(doubtful) > 0) {
+    penalties <- vapply(doubtful, function(d) d$candidate$penalty, numeric(1))
+    best <- doubtful[[which.min(penalties)]]
+    chosen <- best$candidate
+    check <- sprintf(
+      "CHECK: may be the wrong place. ORS matched '%s' (%s level), which %s",
+      chosen$label, chosen$layer, join_and(chosen$problems)
+    )
+    result <- geo_ok(chosen, paste0(best$step$strategy, " (unconfirmed)"), c(plan$notes, best$step$note, check))
+    result$doubtful <- TRUE
+    return(result)
+  }
+
+  # The most useful reasons first: that the name is ambiguous or could not be
+  # confirmed in the state, then a place with the right name in the wrong state,
+  # then everything else (such as places with other names).
   rejected <- unique(rejected)
-  rejected <- rejected[order(!grepl(" is in |different places|could be confirmed", rejected))]
+  usefulness <- ifelse(
+    grepl("could be confirmed|different places", rejected), 0,
+    ifelse(grepl(" is in ", rejected) & !grepl("is not named", rejected), 1, 2)
+  )
+  rejected <- rejected[order(usefulness)]
   detail <- unique(c(plan$notes, rejected))
   geo_fail(
     paste0(
@@ -116,6 +158,7 @@ geo_ok <- function(feature, strategy, flags) {
     lon = feature$lon, lat = feature$lat,
     match_layer = feature$layer, label = feature$label,
     flag = if (length(flags) > 0) paste(flags, collapse = "; ") else NA_character_,
+    doubtful = FALSE,
     strategy = strategy,
     error = NA_character_, error_permanent = FALSE, error_kind = "ok"
   )
@@ -124,7 +167,7 @@ geo_ok <- function(feature, strategy, flags) {
 geo_fail <- function(error, permanent, kind) {
   list(
     lon = NA_real_, lat = NA_real_, match_layer = NA_character_, label = NA_character_,
-    flag = NA_character_, strategy = NA_character_,
+    flag = NA_character_, doubtful = FALSE, strategy = NA_character_,
     error = error, error_permanent = permanent, error_kind = kind
   )
 }
@@ -133,6 +176,14 @@ describe_location <- function(loc) {
   parts <- c(loc$street, loc$city, loc$state, loc$zip, loc$country)
   parts <- parts[!is.na(parts)]
   if (length(parts) == 0) "an empty location" else paste(parts, collapse = ", ")
+}
+
+#' Join phrases into a sentence: "a", "a and b", "a, b and c"
+#' @noRd
+join_and <- function(x) {
+  n <- length(x)
+  if (n <= 1) return(paste(x, collapse = ""))
+  paste0(paste(x[-n], collapse = ", "), " and ", x[n])
 }
 
 
@@ -323,8 +374,9 @@ ors_no_lookup_failure <- function(loc, zip_found, notes) {
 #' Send one lookup and judge what comes back
 #'
 #' @return A list with \code{outcome}: \code{"match"} (with \code{feature} and
-#'   \code{flags}), \code{"none"} (nothing acceptable, with \code{notes} saying
-#'   why candidates were rejected) or \code{"error"} (the request itself
+#'   \code{flags}), \code{"none"} (nothing clean, with \code{notes} saying why
+#'   candidates were rejected and \code{doubtful} holding any candidate that
+#'   could still be used with a warning) or \code{"error"} (the request itself
 #'   failed, with the failure in \code{result}).
 #' @noRd
 ors_run_step <- function(step) {
@@ -339,7 +391,7 @@ ors_run_step <- function(step) {
   features <- res$body[["features"]]
   chosen <- ors_choose(if (is.list(features)) features else list(), step$rule)
   if (is.null(chosen$feature)) {
-    return(list(outcome = "none", notes = chosen$notes))
+    return(list(outcome = "none", notes = chosen$notes, doubtful = chosen$doubtful))
   }
   list(outcome = "match", feature = chosen$feature, flags = chosen$flags)
 }
@@ -365,73 +417,123 @@ ors_parse_feature <- function(f) {
   )
 }
 
-#' Pick the acceptable candidate, if there is one
+#' Sort the candidates into accepted, doubtful and ruled out
 #'
-#' A candidate is rejected unless it is: at one of the asked-for layers; an
-#' exact match (not a "fallback" to something coarser); named like the city
-#' that was asked for (city lookups); in the right country; and not provably in
-#' the wrong state. Of those that remain, one confirmed in the right state is
-#' preferred. When no state is given and the remaining candidates are different
-#' places, the name is ambiguous and nothing is chosen.
+#' Each candidate is compared with what the lane says, using only what the
+#' geocoder returned. A candidate is \emph{ruled out} (never returned) if it is
+#' not at one of the asked-for layers, or is in another country. Otherwise it is
+#' \emph{accepted} if it passes every check, or \emph{doubtful} if it fails one
+#' or more:
+#' \itemize{
+#'   \item it is not an exact match (a "fallback" match, where the geocoder
+#'     could match only part of the query);
+#'   \item for a city lookup, its name is not the city that was asked for
+#'     (ignoring case, accents, punctuation, and "St" versus "Saint");
+#'   \item its state is provably different from the lane's (both states are
+#'     recognized and they differ).
+#' }
+#' Of the accepted candidates, one confirmed in the right state is preferred.
+#' If the lane has no state and the accepted candidates are different places,
+#' the name is ambiguous: the first is offered as doubtful. In a strict lookup,
+#' an accepted candidate whose state cannot be confirmed is also doubtful.
 #'
 #' @param features The \code{features} list from a Pelias response.
 #' @param rule A list: \code{layers_ok}, \code{city} (\code{NA} for no name
-#'   check), \code{country}, \code{state}, \code{strict_state} (accept only a
-#'   candidate confirmed in the state) and \code{check_ambiguity}.
-#' @return A list with \code{feature} (or \code{NULL}), \code{flags} and
-#'   \code{notes} (why candidates were rejected).
+#'   check), \code{country}, \code{state}, \code{strict_state} and
+#'   \code{check_ambiguity}.
+#' @return A list with \code{feature} (the accepted candidate, or \code{NULL}),
+#'   \code{flags}, \code{notes} (why candidates were not accepted) and
+#'   \code{doubtful} (candidates that could be used with a warning, each with
+#'   \code{problems}, a list of phrases such as "is not named Zapopan").
 #' @noRd
 ors_choose <- function(features, rule) {
   parsed <- Filter(Negate(is.null), lapply(features, ors_parse_feature))
   notes <- character()
   accepted <- list()
+  doubtful <- list()
 
   for (p in parsed) {
-    why <- NULL
     if (is.na(p$layer) || !p$layer %in% rule$layers_ok) {
-      why <- sprintf("%s is not at the level asked for", p$label)
-    } else if (!identical(p$match_type, "exact")) {
-      why <- sprintf("%s was only an approximate match", p$label)
-    } else if (!is.na(rule$city) && !identical(norm_place(rule$city), norm_place(p$name))) {
-      why <- sprintf("%s is not named %s", p$label, rule$city)
-    } else if (!is.na(rule$country) && !is.na(p$country) && !identical(p$country, rule$country)) {
-      why <- sprintf("%s is in %s, not %s", p$label, p$country, rule$country)
-    } else {
-      p$relation <- state_relation(rule$state, p$region, rule$country)
-      if (p$relation == "mismatch") {
-        why <- sprintf("%s is in %s, not %s", p$label, p$region, rule$state)
-      }
+      notes <- c(notes, sprintf("%s is not at the level asked for", p$label))
+      next
     }
-    if (is.null(why)) {
+    if (!is.na(rule$country) && !is.na(p$country) && !identical(p$country, rule$country)) {
+      notes <- c(notes, sprintf("%s is in %s, not %s", p$label, p$country, rule$country))
+      next
+    }
+
+    # Each problem has a weight, used to pick the least doubtful candidate: a
+    # different name or a different state is a bigger worry than a loose match.
+    problems <- character()
+    penalty <- 0
+    if (!identical(p$match_type, "exact")) {
+      problems <- c(problems, "is only an approximate match")
+      penalty <- penalty + 1
+    }
+    if (!is.na(rule$city) && !identical(norm_place(rule$city), norm_place(p$name))) {
+      problems <- c(problems, sprintf("is not named %s", rule$city))
+      penalty <- penalty + 2
+    }
+    p$relation <- state_relation(rule$state, p$region, rule$country)
+    if (p$relation == "mismatch") {
+      problems <- c(problems, sprintf("is in %s, not %s", p$region, rule$state))
+      penalty <- penalty + 2
+    }
+
+    if (length(problems) == 0) {
       accepted[[length(accepted) + 1]] <- p
     } else {
-      notes <- c(notes, why)
+      p$problems <- problems
+      p$penalty <- penalty
+      doubtful[[length(doubtful) + 1]] <- p
+      notes <- c(notes, paste(p$label, join_and(problems)))
     }
   }
 
-  none <- function(extra = NULL) list(feature = NULL, flags = character(), notes = c(notes, extra))
+  nothing_clean <- function(extra_note = NULL, extra_doubtful = NULL) {
+    list(
+      feature = NULL, flags = character(),
+      notes = c(notes, extra_note), doubtful = c(doubtful, extra_doubtful)
+    )
+  }
   if (length(accepted) == 0) {
-    return(none())
+    return(nothing_clean())
   }
 
   if (!is.na(rule$state)) {
     confirmed <- Filter(function(p) identical(p$relation, "match"), accepted)
     if (length(confirmed) > 0) {
-      return(list(feature = confirmed[[1]], flags = character(), notes = notes))
+      return(list(feature = confirmed[[1]], flags = character(), notes = notes, doubtful = list()))
     }
     if (isTRUE(rule$strict_state)) {
-      return(none(sprintf("no place with that name could be confirmed in %s", rule$state)))
+      first <- accepted[[1]]
+      first$problems <- sprintf("is in a state that could not be confirmed as %s", rule$state)
+      first$penalty <- 1
+      return(nothing_clean(
+        sprintf("no place with that name could be confirmed in %s", rule$state),
+        list(first)
+      ))
     }
-    return(list(feature = accepted[[1]], flags = "state could not be verified", notes = notes))
+    return(list(
+      feature = accepted[[1]], flags = "state could not be verified",
+      notes = notes, doubtful = list()
+    ))
   }
 
   if (isTRUE(rule$check_ambiguity)) {
     places <- unique(vapply(accepted, function(p) sprintf("%s|%.2f|%.2f", p$label, p$lon, p$lat), character(1)))
     if (length(places) > 1) {
-      return(none(sprintf(
-        "the name matches %d different places and no state was given to choose between them", length(places)
-      )))
+      first <- accepted[[1]]
+      first$problems <- sprintf(
+        "is the first of %d different places with this name, and no state was given to choose between them",
+        length(places)
+      )
+      first$penalty <- 1
+      return(nothing_clean(
+        sprintf("the name matches %d different places and no state was given to choose between them", length(places)),
+        list(first)
+      ))
     }
   }
-  list(feature = accepted[[1]], flags = character(), notes = notes)
+  list(feature = accepted[[1]], flags = character(), notes = notes, doubtful = list())
 }

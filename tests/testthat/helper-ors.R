@@ -50,7 +50,8 @@ local_ors <- function(responses = list(), env = parent.frame(), key = ors_test_k
       truckr.ors_requests_per_minute = NULL,
       truckr.http_attempts = NULL,
       truckr.http_backoff_seconds = NULL,
-      truckr.http_timeout = NULL
+      truckr.http_timeout = NULL,
+      truckr.geocode_doubtful = NULL
     ),
     .local_envir = env
   )
