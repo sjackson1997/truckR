@@ -57,10 +57,11 @@ ors_requests_per_minute <- function() {
   numeric_option("truckr.ors_requests_per_minute", ors_default_requests_per_minute)
 }
 
-#' How many times a failed request is retried (so 3 means up to 4 requests)
+#' The most times one request is tried in total: the first attempt plus the
+#' retries. The default of 3 means the first request and up to two retries.
 #' @noRd
-ors_max_retries <- function() {
-  numeric_option("truckr.http_retries", 3, positive = FALSE, whole = TRUE)
+ors_max_attempts <- function() {
+  numeric_option("truckr.http_attempts", 3, positive = TRUE, whole = TRUE)
 }
 
 #' Seconds to wait before the first retry; each retry waits twice as long
@@ -80,7 +81,7 @@ ors_backoff_cap_seconds <- 30
 ors_check_settings <- function() {
   ors_base_url()
   ors_requests_per_minute()
-  ors_max_retries()
+  ors_max_attempts()
   ors_backoff_seconds()
   ors_timeout_seconds()
   invisible(TRUE)
@@ -372,9 +373,10 @@ ors_quota <- function(kind = c("directions", "geocode")) {
 #' affected.
 #'
 #' Retries: a network error, a 5xx, or a 429 that is not the daily quota
-#' running out is retried up to \code{truckr.http_retries} times (default 3)
-#' with waits of 2, 4, 8 seconds (\code{truckr.http_backoff_seconds}, doubled
-#' each time, at most 30 seconds). A larger \code{Retry-After} from the server is
+#' running out is retried until \code{truckr.http_attempts} attempts have been
+#' made in total (default 3: the first request and two retries), with waits of
+#' 2 and then 4 seconds (\code{truckr.http_backoff_seconds}, doubled each time,
+#' at most 30 seconds). A larger \code{Retry-After} from the server is
 #' honoured, up to 60 seconds. Each retry prints a message. Other 4xx responses
 #' and an exhausted daily quota are not retried.
 #'
@@ -413,7 +415,7 @@ ors_request <- function(kind = c("directions", "geocode"), path, query = list(),
     headers <- c(Authorization = key)
   }
 
-  retries <- ors_max_retries()
+  retries <- ors_max_attempts() - 1L
   attempt <- 0L
   repeat {
     ors_throttle()

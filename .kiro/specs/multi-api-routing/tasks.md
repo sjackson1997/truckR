@@ -76,7 +76,7 @@ Working rules for every task:
 - [x] 8. Implement the ORS HTTP layer
   - A single internal function (for example `ors_request()`) through which all ORS traffic passes, so tests can replace it with saved fixtures.
   - Reads the key from `TRUCKR_ORS_API_KEY` at call time; sends it in the `Authorization` header for directions and the `api_key` parameter for geocoding (as confirmed in the spike).
-  - Reads `x-ratelimit-limit`, `x-ratelimit-remaining` and `x-ratelimit-reset` from responses and exposes them; retries network errors, HTTP 5xx and rate-limit 429s with exponential backoff (default 3 retries) with `message()` notices; does not retry other 4xx; spaces requests under a configurable requests-per-minute.
+  - Reads `x-ratelimit-limit`, `x-ratelimit-remaining` and `x-ratelimit-reset` from responses and exposes them; retries network errors, HTTP 5xx and rate-limit 429s with exponential backoff (3 attempts in total by default) with `message()` notices; does not retry other 4xx; spaces requests under a configurable requests-per-minute.
   - Classify every failure as temporary or permanent so the cache can decide what to keep (Requirement 14.13): network errors, timeouts, 429, 5xx and exhausted quota are temporary; a request the provider understood and rejected as unanswerable (for example no match found) is permanent. Anything unclear is temporary. Pass every error message through `redact_key()`.
   - Tests with a mocked `httr` layer: success, 429 then success, 5xx exhausting retries, 4xx not retried, missing key, and the temporary/permanent classification for each case.
   - Done when: all behaviors pass with no network calls.

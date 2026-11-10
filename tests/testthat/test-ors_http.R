@@ -275,7 +275,7 @@ test_that("the base address and timeout can be set", {
 test_that("a rate limit (429) then success is retried once, with a message", {
   log <- local_ors(list(raw_status(429, headers = limits(200, 12)), raw_ok()))
 
-  expect_message(got <- ors_request("directions", "/x"), "retrying in 2 s \\(retry 1 of 3\\)")
+  expect_message(got <- ors_request("directions", "/x"), "retrying in 2 s \\(retry 1 of 2\\)")
 
   expect_true(got$ok)
   expect_equal(got$attempts, 2)
@@ -283,20 +283,20 @@ test_that("a rate limit (429) then success is retried once, with a message", {
   expect_equal(log$sleeps, 2)
 })
 
-test_that("a server error is retried with doubling waits, then reported as temporary", {
-  log <- local_ors(rep(list(raw_error(503, "Service Unavailable")), 4))
+test_that("a server error is tried three times in total, then reported as temporary", {
+  log <- local_ors(rep(list(raw_error(503, "Service Unavailable")), 3))
 
   msgs <- testthat::capture_messages(got <- ors_request("directions", "/x"))
 
   expect_false(got$ok)
-  expect_equal(got$attempts, 4)
-  expect_length(log$calls, 4)
-  expect_equal(log$sleeps, c(2, 4, 8))
-  expect_length(msgs, 3)
+  expect_equal(got$attempts, 3)
+  expect_length(log$calls, 3)
+  expect_equal(log$sleeps, c(2, 4))
+  expect_length(msgs, 2)
   expect_equal(got$error_kind, "server")
   expect_false(got$error_permanent)
   expect_match(got$error, "ORS server error \\(HTTP 503\\): Service Unavailable")
-  expect_match(got$error, "gave up after 4 attempts")
+  expect_match(got$error, "gave up after 3 attempts")
 })
 
 test_that("a network error is retried and can recover", {
@@ -310,7 +310,7 @@ test_that("a network error is retried and can recover", {
 })
 
 test_that("a network error that never recovers is a temporary failure", {
-  local_ors(rep(list(raw_network("Timeout was reached")), 4))
+  local_ors(rep(list(raw_network("Timeout was reached")), 3))
 
   suppressMessages(got <- ors_request("directions", "/x"))
 
@@ -323,7 +323,7 @@ test_that("a network error that never recovers is a temporary failure", {
 
 test_that("backoff waits are capped at 30 seconds", {
   log <- local_ors(rep(list(raw_status(500)), 6))
-  withr::local_options(truckr.http_retries = 5, truckr.http_backoff_seconds = 10)
+  withr::local_options(truckr.http_attempts = 6, truckr.http_backoff_seconds = 10)
 
   suppressMessages(ors_request("directions", "/x"))
 
@@ -350,19 +350,19 @@ test_that("a smaller Retry-After does not shorten the backoff", {
   expect_equal(log$sleeps, 2)
 })
 
-test_that("the number of retries and the first wait are settings", {
-  log <- local_ors(rep(list(raw_status(500)), 3))
-  withr::local_options(truckr.http_retries = 2, truckr.http_backoff_seconds = 5)
+test_that("the number of attempts and the first wait are settings", {
+  log <- local_ors(rep(list(raw_status(500)), 4))
+  withr::local_options(truckr.http_attempts = 4, truckr.http_backoff_seconds = 5)
 
   suppressMessages(got <- ors_request("directions", "/x"))
 
-  expect_equal(got$attempts, 3)
-  expect_equal(log$sleeps, c(5, 10))
+  expect_equal(got$attempts, 4)
+  expect_equal(log$sleeps, c(5, 10, 20))
 })
 
-test_that("zero retries means a failure is reported at once", {
+test_that("one attempt in total means a failure is reported at once", {
   log <- local_ors(list(raw_status(500), raw_ok()))
-  withr::local_options(truckr.http_retries = 0)
+  withr::local_options(truckr.http_attempts = 1)
 
   expect_no_message(got <- ors_request("directions", "/x"))
 
@@ -473,7 +473,7 @@ test_that("an unexpected status is temporary and not retried", {
 
 test_that("an error response with no explanation still gives a usable message", {
   local_ors(list(raw_status(500, text = NA_character_)))
-  withr::local_options(truckr.http_retries = 0)
+  withr::local_options(truckr.http_attempts = 1)
 
   got <- ors_request("directions", "/x")
 
@@ -541,7 +541,7 @@ test_that("the key is removed from a network error message, the retry notice and
     "Failed to connect to api.openrouteservice.org: GET https://api.openrouteservice.org/geocode/search?api_key=",
     ors_test_key, "&text=Laredo"
   )
-  local_ors(rep(list(raw_network(leaky)), 4))
+  local_ors(rep(list(raw_network(leaky)), 3))
 
   msgs <- testthat::capture_messages(got <- ors_request("geocode", "/geocode/search"))
 
@@ -565,11 +565,11 @@ test_that("the key is removed when ORS echoes it back in an error", {
 test_that("bad settings are reported before anything is sent", {
   log <- local_ors(list(raw_ok()))
 
-  withr::local_options(truckr.http_retries = -1)
-  expect_error(ors_request("directions", "/x"), "`truckr.http_retries` must be a single non-negative whole number")
-  withr::local_options(truckr.http_retries = 1.5)
+  withr::local_options(truckr.http_attempts = 0)
+  expect_error(ors_request("directions", "/x"), "`truckr.http_attempts` must be a single positive whole number")
+  withr::local_options(truckr.http_attempts = 1.5)
   expect_error(ors_request("directions", "/x"), "whole number")
-  withr::local_options(truckr.http_retries = 3, truckr.http_backoff_seconds = 0)
+  withr::local_options(truckr.http_attempts = 3, truckr.http_backoff_seconds = 0)
   expect_error(ors_request("directions", "/x"), "`truckr.http_backoff_seconds` must be a single positive number")
   withr::local_options(truckr.http_backoff_seconds = 2, truckr.ors_requests_per_minute = "fast")
   expect_error(ors_request("directions", "/x"), "truckr.ors_requests_per_minute")

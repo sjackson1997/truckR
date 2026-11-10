@@ -142,7 +142,7 @@ The truckR package currently supports only the PC Miler API for transportation r
 
 #### Acceptance Criteria
 
-1. IF an API request fails due to a network error (timeout, connection refused), THEN THE Router SHALL retry the request up to a configurable number of times (default 3) with exponential backoff
+1. IF an API request fails due to a network error (timeout, connection refused), THEN THE Router SHALL retry the request, with exponential backoff, until a configurable maximum number of attempts has been made (default 3 in total: the first request and up to two retries)
 2. IF all retry attempts fail, THEN THE Router SHALL return an error entry in the Route_Result with the failure reason rather than stopping execution
 3. WHEN a Provider returns an HTTP error status (4xx or 5xx), THE Router SHALL classify it as retryable (5xx, 429) or non-retryable (4xx except 429) and only retry retryable errors
 4. THE Router SHALL emit informative messages via `message()` during retries so users are aware of transient failures

@@ -47,7 +47,7 @@ local_ors <- function(responses = list(), env = parent.frame(), key = ors_test_k
     list(
       truckr.ors_base_url = NULL,
       truckr.ors_requests_per_minute = NULL,
-      truckr.http_retries = NULL,
+      truckr.http_attempts = NULL,
       truckr.http_backoff_seconds = NULL,
       truckr.http_timeout = NULL
     ),
