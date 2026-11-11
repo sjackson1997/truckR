@@ -28,71 +28,23 @@ something like `mdlzTransport`, `freightR`, `sourcingTools`, or similar.
 
 ---
 
-## Current State (as of 2025-01-xx, commit 975c6fa)
+## Status (October 2026)
 
-### What exists in `truckR/R/`:
-| File | Status |
-|------|--------|
-| `pcm_prep_dataframe.R` | Good — documented, exported |
-| `pcm_process_request.R` | Needs docs, uses global vars |
-| `pcm_Route_json.R` | Partial docs |
-| `pcm_POST.R` | Partial docs, references global `route_url_post` and `PC_MILER_API_KEY` |
-| `pcm_MileageReport_to_df.R` | Partial docs |
-| `convert_row_to_list.R` | Internal helper, shouldn't be exported |
-| `split_df_to_size.R` | Good — documented |
-| `get_location_columns.R` | Internal helper, no docs |
-| `match_columns.R` | Internal helper, no docs |
-| `utils.R` | `fix.ZIP`, `fix.CTRY`, `fix.MODE` — no docs, should be exported |
-| `utils-pipe.R` | Magrittr pipe re-export (fine) |
-| `PC_Miler_API.R` | **PROBLEM** — loose script with executable code, must be removed from `R/` |
-| `sysdata.rda` | Internal data (`pcm_address_regexes`) — correct |
+Done:
+- P0 blockers: `PC_Miler_API.R` moved to `inst/examples` (API key removed), `scratch.R` ignored, `pcm_POST` takes the key and URL as arguments.
+- P1: roxygen-managed exports; DESCRIPTION filled in; every exported function and both data sets documented. `devtools::check()` is clean (0 errors, 0 warnings, 0 notes).
+- P2: testthat set up (about 430 test blocks, all offline). The older `pcm_*` functions still have no tests.
+- Bid reports: `read_BidReport2()` and `ingest_bidreports()` added.
+- New (spec `.kiro/specs/multi-api-routing`, Phase 1): `route()` with an optional waypoint, the OpenRouteService provider, provider registry, answer cache with quota handling, README and NEWS.
 
-### Datasets in `data/`:
-- `df_route_samples.rda` — clean test routes
-- `df_route_unclean.rda` — routes with intentional errors for testing
-
-### Git:
-- 30+ commits on `main`, pushed to `origin/main`
-- Clean history, no branches
+Next (the later phases of the routing spec):
+1. Phase 2: second provider (OSRM, Google or HERE) for production-scale runs, since the free ORS limits (2,000 routes per day) are small for big bid files.
+2. Phase 3: credential helpers, provider options, retry and batch settings.
+3. Phase 4: refactor the PC*MILER functions onto the provider interface, tests for them, CRAN-style extras (vignette, pkgdown, GitHub Actions).
+4. Then P3 below (migrating functions from Resource_Files).
 
 ---
-
-## Issues to Fix (Priority Order)
-
-### P0 — Blockers (package won't pass `R CMD check`)
-
-1. **Remove `PC_Miler_API.R` from `R/`** — it contains top-level executable code
-   (readRDS, loops, API calls). Move to `inst/examples/pcm_example.R` or delete.
-2. **Remove `scratch.R`** from package root (or add to `.Rbuildignore`).
-3. **Eliminate global variable references** in `pcm_POST.R`:
-   - `route_url_post` → make a parameter with a default
-   - `PC_MILER_API_KEY` → parameter defaulting to `Sys.getenv("PC_MILER_API_KEY")`
-
-### P1 — Structural improvements
-
-4. **Switch NAMESPACE to roxygen2-managed exports.** Remove `exportPattern(...)` line.
-   Add `@export` only to user-facing functions. Run `devtools::document()`.
-   - Export: `pcm_prep_dataframe`, `pcm_process_request`, `fix.ZIP`, `fix.CTRY`, `fix.MODE`, `split_df_to_size`
-   - Keep internal: `convert_row_to_list`, `match_columns`, `get_location_columns1`, `get_location_columns2`, `pcm_Route_json`, `pcm_POST`, `pcm_MileageReport_to_df`
-5. **Fix DESCRIPTION:**
-   - Fill in Title, Author, Maintainer, Description
-   - Add to `Imports`: `dplyr`, `rlang`, `stringr`
-   - Add to `Suggests`: `testthat (>= 3.0.0)`
-   - Consider bumping R dependency to `>= 4.1.0` (for native pipe, if desired)
-6. **Complete roxygen documentation** for all exported functions — especially
-   `@return`, `@param` descriptions, and `@examples`.
-
-### P2 — Testing
-
-7. **Set up testthat infrastructure:** `usethis::use_testthat()`
-8. **Write tests for pure functions first:**
-   - `fix.ZIP()` — use `df_route_unclean` to verify corrections
-   - `fix.CTRY()` — test "U.S.", "USA", "MEX", "CAN", "CA", "MX" variants
-   - `fix.MODE()` — test "OTR", "TL", "ROAD", "INTRMDL", "IMDL" variants
-   - `split_df_to_size()` — verify chunk sizes
-   - `pcm_prep_dataframe()` — verify RouteId assignment and deduplication
-9. **Mock API tests** (later) for `pcm_POST` / `pcm_process_request` using `httptest` or `webmockr`.
-
+## Remaining plan
 ### P3 — Migrate functions from Resource_Files
 
 Source location: `Resource_Files/Scripts/Reused_Common_Scripts/` and `Resource_Files/Scripts/`

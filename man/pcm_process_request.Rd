@@ -2,10 +2,16 @@
 % Please edit documentation in R/pcm_process_request.R
 \name{pcm_process_request}
 \alias{pcm_process_request}
-\title{Title}
+\title{Run a prepared set of routes through PC*MILER}
 \usage{
 pcm_process_request(lst)
 }
+\arguments{
+\item{lst}{The list made by \code{\link{pcm_prep_dataframe}}.}
+}
+\value{
+A data frame of the labelled input rows with the PC*MILER results.
+}
 \description{
-Title
+Run a prepared set of routes through PC*MILER
 }

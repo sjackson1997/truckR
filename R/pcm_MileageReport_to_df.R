@@ -1,11 +1,9 @@
-#' Title
+#' Turn a PC*MILER mileage report into a data frame
 #'
-#' @param report_list
+#' @param report_list The parsed content of a PC*MILER route reports response.
 #'
-#' @return
+#' @return A data frame with one row for each stop of each route.
 #' @export
-#'
-#' @examples
 pcm_MileageReport_to_df <- function(report_list) {
   # Initialize an empty list to store extracted information
   extracted_info <- list()

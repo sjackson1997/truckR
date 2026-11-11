@@ -1,11 +1,12 @@
 Type: Package
 Package: truckR
 Title: Truck Routing and Bid Report Utilities
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Scott", "Jackson", email = "sjackson1997@gmail.com", role = c("aut", "cre"))
-Description: Helper functions for truck routing workflows, including PC*MILER
-    API requests and utilities for reading and ingesting transportation bid
+Description: Driving distance and time for freight lanes with optional waypoints,
+    using OpenRouteService (with saved answers and quota handling), plus
+    helpers for PC*MILER API requests and for reading transportation bid
     reports.
 License: MIT + file LICENSE
 Depends: 

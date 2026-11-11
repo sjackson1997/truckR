@@ -1,14 +1,13 @@
 #' Convert dataframe of origin/destination pairs to JSON file for PC Miler API
 #'
 #' @param df A dataframe containing origin/destination column(s).
-#' @param ReportType
-#' @param lst_origins
-#' @param lst_destinations
+#' @param ReportType The PC*MILER report type.
+#' @param lst_origins Names of the origin address fields and the columns that
+#'   hold them.
+#' @param lst_destinations The same for the destination.
 #'
-#' @return
+#' @return A JSON request body.
 #' @export
-#'
-#' @examples
 pcm_Route_json <- function(df, ReportType = "MileageReportType",
                            lst_origins = lst_origins,
                            lst_destinations = lst_destinations) {

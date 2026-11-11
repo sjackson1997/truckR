@@ -2,10 +2,16 @@
 % Please edit documentation in R/pcm_MileageReport_to_df.R
 \name{pcm_MileageReport_to_df}
 \alias{pcm_MileageReport_to_df}
-\title{Title}
+\title{Turn a PC*MILER mileage report into a data frame}
 \usage{
 pcm_MileageReport_to_df(report_list)
 }
+\arguments{
+\item{report_list}{The parsed content of a PC*MILER route reports response.}
+}
+\value{
+A data frame with one row for each stop of each route.
+}
 \description{
-Title
+Turn a PC*MILER mileage report into a data frame
 }

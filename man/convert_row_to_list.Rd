@@ -2,10 +2,22 @@
 % Please edit documentation in R/convert_row_to_list.R
 \name{convert_row_to_list}
 \alias{convert_row_to_list}
-\title{Title}
+\title{Pick one row of a data frame out as a named list}
 \usage{
 convert_row_to_list(df, pcm_lst_addressHdrs, i)
 }
+\arguments{
+\item{df}{A data frame.}
+
+\item{pcm_lst_addressHdrs}{A named list or vector: the names are the
+PC*MILER address field names and the values are the matching column names
+in \code{df}.}
+
+\item{i}{The row number.}
+}
+\value{
+A named list with one element for each address field.
+}
 \description{
-Title
+Used to build the address entries of a PC*MILER request.
 }

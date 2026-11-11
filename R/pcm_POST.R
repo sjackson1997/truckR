@@ -1,16 +1,17 @@
-#' Title
+#' Send routes to the PC*MILER route reports service
 #'
-#' @param df
-#' @param lst_origins
-#' @param lst_destinations
+#' @param df A data frame of routes with a \code{RouteId} column, as made by
+#'   \code{\link{pcm_prep_dataframe}}.
+#' @param lst_origins Names of the origin address fields and the columns that
+#'   hold them.
+#' @param lst_destinations The same for the destination.
 #' @param route_url_post URL of the PC Miler route reports endpoint.
 #' @param api_key PC Miler API key. Defaults to the \code{PC_MILER_API_KEY}
 #'   environment variable, read at call time (never stored in the package).
 #'
-#' @return
+#' @return A data frame with one row for each route, with \code{orig_} and
+#'   \code{dest_} columns.
 #' @export
-#'
-#' @examples
 pcm_POST <- function(df, lst_origins = lst_origins,
                      lst_destinations = lst_destinations,
                      route_url_post = "https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/route/routeReports?dataVersion=Current",

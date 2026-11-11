@@ -13,6 +13,16 @@ pcm_Route_json(
 }
 \arguments{
 \item{df}{A dataframe containing origin/destination column(s).}
+
+\item{ReportType}{The PC*MILER report type.}
+
+\item{lst_origins}{Names of the origin address fields and the columns that
+hold them.}
+
+\item{lst_destinations}{The same for the destination.}
+}
+\value{
+A JSON request body.
 }
 \description{
 Convert dataframe of origin/destination pairs to JSON file for PC Miler API

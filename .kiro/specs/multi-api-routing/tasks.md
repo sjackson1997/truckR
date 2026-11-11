@@ -121,13 +121,13 @@ Working rules for every task:
   - Done when: results are verified and written up, and a second run is served entirely from cache. (Done: 12 lanes, 20 geocoding and 16 routing requests, second run in a new session made no requests; written up in design.md under 'Live verification'.)
   - _Requirements: 6.1, 13.6, 13.7, 13.8, 13.10, 14.4_
 
-- [ ] 14. Documentation and release hygiene
+- [x] 14. Documentation and release hygiene
   - Complete roxygen documentation (`@param`, `@return`, `@examples` wrapped in `\dontrun{}` for anything needing the API) for every new exported function.
   - Add a short `README` section showing key setup (`.Renviron`), a basic `route()` call, and a waypoint example, plus a note that ORS results are licensed CC-BY-SA 4.0 with the attribution "openrouteservice.org | OpenStreetMap contributors", which matters if results are shared outside the company.
   - Run `devtools::document()` and `devtools::check()`; confirm no new warnings or notes.
   - Update `TODO_package_plan.md` to remove the items that are now done and reflect the new priorities.
   - Rebuild and reinstall into the global library so `library(truckR)` has the new functions; run `renv::snapshot(dev = TRUE)`.
-  - Done when: the check is clean apart from the known Phase 4 documentation warnings and a fresh R session can call `route()` on a small example.
+  - Done when: the check is clean apart from the known Phase 4 documentation warnings and a fresh R session can call `route()` on a small example. (Done, and better: the older `pcm_*` functions and both data sets were documented too, so `devtools::check()` gives 0 errors, 0 warnings, 0 notes. Version is now 0.2.0, with `NEWS.md` and `README.md`. Installed in the global library; a fresh session outside the project ran `route()` from the saved answers.)
   - _Requirements: 10.1, 10.4, 10.5, 10.6_
 
 ## Checkpoints

@@ -1,11 +1,9 @@
-#' Title
+#' Run a prepared set of routes through PC*MILER
 #'
-#' @param lst
+#' @param lst The list made by \code{\link{pcm_prep_dataframe}}.
 #'
-#' @return
+#' @return A data frame of the labelled input rows with the PC*MILER results.
 #' @export
-#'
-#' @examples
 pcm_process_request <- function(lst) {
   lst_to_process <- split_df_to_size(lst$Unique)
 
@@ -25,6 +23,6 @@ pcm_process_request <- function(lst) {
     }
   ))
 
-  df_final <- left_join(lst$Labeled, df_routes, by = "RouteId") %>%
-    glimpse()
+  df_final <- dplyr::left_join(lst$Labeled, df_routes, by = "RouteId") %>%
+    dplyr::glimpse()
 }

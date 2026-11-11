@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcm_POST.R
 \name{pcm_POST}
 \alias{pcm_POST}
-\title{Title}
+\title{Send routes to the PC*MILER route reports service}
 \usage{
 pcm_POST(
   df,
@@ -14,11 +14,23 @@ pcm_POST(
 )
 }
 \arguments{
+\item{df}{A data frame of routes with a \code{RouteId} column, as made by
+\code{\link{pcm_prep_dataframe}}.}
+
+\item{lst_origins}{Names of the origin address fields and the columns that
+hold them.}
+
+\item{lst_destinations}{The same for the destination.}
+
 \item{route_url_post}{URL of the PC Miler route reports endpoint.}
 
 \item{api_key}{PC Miler API key. Defaults to the \code{PC_MILER_API_KEY}
 environment variable, read at call time (never stored in the package).}
 }
+\value{
+A data frame with one row for each route, with \code{orig_} and
+  \code{dest_} columns.
+}
 \description{
-Title
+Send routes to the PC*MILER route reports service
 }
