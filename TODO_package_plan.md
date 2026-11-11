@@ -44,6 +44,8 @@ Next (the later phases of the routing spec):
 4. Then P3 below (migrating functions from Resource_Files).
 
 ---
+Open question (before sharing any routing results outside the company):
+- OpenRouteService results are based on OpenStreetMap and are licensed CC-BY-SA 4.0, which asks for attribution ("openrouteservice.org | OpenStreetMap contributors") and may apply share-alike terms to what is shared. For now the package is used only inside the company, so nothing is needed. Before sharing distances with a carrier, customer or other outside party: (1) read the formal ORS Terms of Service (only a forum answer from ORS staff has been read, which said storing results is fine), (2) ask Legal or Procurement whether the attribution is enough, (3) decide whether to add the attribution line to exported files. The same check applies to any second provider added later. The README has a short note on this.
 ## Remaining plan
 ### P3 — Migrate functions from Resource_Files
 
