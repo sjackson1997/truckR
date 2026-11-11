@@ -159,6 +159,9 @@ The truckR package currently supports only the PC Miler API for transportation r
 2. THE Router SHALL combine all chunk results into a single Route_Result data frame with consistent column ordering
 3. WHILE processing batches, THE Router SHALL emit progress messages indicating how many chunks remain
 4. WHEN a single chunk fails after retries, THE Router SHALL continue processing remaining chunks and include error entries for the failed routes in the final Route_Result
+5. BEFORE sending requests, THE Router SHALL work out how many requests the run needs after taking out the answers already saved, and SHALL tell the user that number and, where the Provider can report it, how many requests remain today
+6. WHEN the remaining quota is not enough for the run, THE Router SHALL request as many as fit, save the answers, stop without an error, and return every lane that could not be routed with the error "quota exhausted; re-run after reset", so that running again finishes the job without repeating any request that was already answered. THE Router SHALL also stop when a request is answered with "quota exhausted"
+7. WHEN the Provider rejects the API key, THE Router SHALL stop the run at once. WHEN several requests in a row fail for a temporary reason (default 5, configurable), THE Router SHALL stop the run and report the lanes that were not requested, rather than continuing through an outage; a definite answer such as "no route found" SHALL NOT count as such a failure. Answers already obtained SHALL be saved however the run ends
 
 ### Requirement 13: Intermediate Waypoints (Pass-Through Points)
 

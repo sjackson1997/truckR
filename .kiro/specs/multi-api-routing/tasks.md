@@ -98,13 +98,13 @@ Working rules for every task:
   - Done when: offline tests pass and the live findings are written into the design document.
   - _Requirements: 6.4, 14.1, 14.2, 14.5, 14.6, 14.8, 14.9, 14.10, 14.14_
 
-- [ ] 11. Implement the quota pre-flight and graceful stop
-  - Before routing, count the segments that are not already cached (an entry older than 120 days counts as not cached) and compare against the remaining quota (from the last seen headers, or a conservative default); report the numbers up front with `message()`.
-  - If the run exceeds the quota, route as many segments as fit, cache them, stop cleanly, and return the remaining lanes with `route_error = "quota exhausted; re-run after reset"` so a later re-run completes the job.
-  - Tests with a fake provider that reports a small quota: the run stops at the limit, results are cached, and a second run finishes only the remaining segments.
-  - Segments with `same_place` TRUE are excluded from the request count and are never sent to a provider (Requirement 9.6).
-  - Done when: the stop-and-resume behavior is verified offline.
-  - _Requirements: 6.5, 11.2, 12.2, 12.3, 12.4_
+- [x] 11. Implement the quota pre-flight and graceful stop
+  - Built as a shared engine, `cached_requests()` (`R/requests.R`), that Task 12 will use for geocoding as well as routing: saved answers first (an entry older than 120 days counts as not saved), then one request at a time, with the number of requests needed and the quota remaining reported up front with `message()` (Requirement 12.5). The remaining quota comes from a new optional provider function, `remaining_quota(kind)`; for ORS it is the last rate-limit header seen, ignored once its 24-hour window has ended (`ors_remaining_quota()`). With no known quota the run goes ahead and respects it as soon as it becomes known.
+  - If the run exceeds the quota, it requests as many as fit, saves them, stops without an error, and the items left over carry the error "quota exhausted; re-run after reset", so a later run completes the job without repeating anything (Requirement 12.6). It also stops on a "quota exhausted" answer, on a rejected API key, and after 5 temporary failures in a row (Requirement 12.7); the cache is written however the run ends.
+  - `route_segments()` applies the engine to the segments from Task 4 and returns the table `assemble_results()` needs. Zero-length segments (`same_place`) are left out and never sent to a provider (Requirement 9.6); ends with identical coordinates get distance 0 without a request; ends that could not be geocoded give a clear error without a request.
+  - Tests with a fake provider that reports a small quota: the run stops at the limit and never goes over it, results are cached, a second run finishes only the remaining segments, and the final table shows the quota error on exactly the lanes that were not routed (including a waypoint lane whose second leg ran out). Also: failures in a row, a rejected key, errors inside the provider's function, progress messages, and what is and is not saved after a failure.
+  - Done when: the stop-and-resume behavior is verified offline. (It is: 1,408 tests pass.)
+  - _Requirements: 6.5, 9.6, 11.2, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 
 - [ ] 12. Implement `route()` and the `provider_ors` registration
   - The exported entry point: validate arguments (Task 2), prepare lanes (Task 3), build segments (Task 4), geocode unique locations (Tasks 7 and 10), route unique segments (Tasks 7, 9 and 11), assemble results (Task 6).

@@ -363,9 +363,34 @@ ors_note_rate_limit <- function(kind, headers) {
   invisible(TRUE)
 }
 
+#' How many requests ORS says are left today
+#'
+#' This is the ORS provider's \code{remaining_quota}. It reports the last
+#' \code{x-ratelimit-remaining} seen, but only while the 24-hour window that
+#' number belongs to has not ended: once the reset time has passed, the number
+#' is stale (an old "0 left" must not block a new day) and the answer is
+#' \code{NA}, meaning not known. The first response of a window reports the
+#' time of the request as its reset time, so the number is also \code{NA}
+#' for the request that follows it; that costs nothing but one unchecked request.
+#'
+#' @param kind \code{"route"} or \code{"geocode"}.
+#' @return A number, or \code{NA_real_} if not known.
+#' @noRd
+ors_remaining_quota <- function(kind = c("route", "geocode")) {
+  kind <- match.arg(kind)
+  q <- ors_quota(if (kind == "route") "directions" else "geocode")
+  if (is.null(q) || is.na(q$remaining)) {
+    return(NA_real_)
+  }
+  if (!is.na(q$reset) && q$reset < ors_now()) {
+    return(NA_real_)
+  }
+  q$remaining
+}
+
 #' The latest rate-limit numbers ORS reported
 #'
-#' Used by the quota pre-flight (Task 11).
+#' Used by \code{ors_remaining_quota()}.
 #' @param kind \code{"directions"} or \code{"geocode"}.
 #' @return A list with \code{limit}, \code{remaining}, \code{reset} (a Unix
 #'   time) and \code{observed_at}, or \code{NULL} if nothing has been seen yet

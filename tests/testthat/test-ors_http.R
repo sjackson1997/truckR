@@ -599,3 +599,57 @@ test_that("an unknown kind of request is rejected", {
 
   expect_error(ors_request("weather", "/x"), "should be one of")
 })
+
+# --- How many requests are left today -----------------------------------------------------------------------------------
+
+test_that("nothing is known before any response has been seen", {
+  local_ors(list())
+
+  expect_true(is.na(ors_remaining_quota("route")))
+  expect_true(is.na(ors_remaining_quota("geocode")))
+})
+
+test_that("the remaining quota is the last number ORS reported, for each kind of request", {
+  local_ors(list(
+    raw_ok(headers = limits(2000, 1500, reset = 1e9 + 5000)),
+    raw_ok(headers = limits(3000, 2900, reset = 1e9 + 5000))
+  ))
+
+  ors_request("directions", "/v2/directions/driving-hgv")
+  ors_request("geocode", "/search")
+
+  expect_equal(ors_remaining_quota("route"), 1500)
+  expect_equal(ors_remaining_quota("geocode"), 2900)
+})
+
+test_that("once the reset time has passed the old number is not trusted", {
+  log <- local_ors(list(raw_ok(headers = limits(2000, 0, reset = 1e9 + 500))))
+
+  ors_request("directions", "/v2/directions/driving-hgv")
+  expect_equal(ors_remaining_quota("route"), 0)
+
+  log$now <- log$now + 501                           # the 24-hour window has rolled over
+
+  expect_true(is.na(ors_remaining_quota("route")))
+})
+
+test_that("the first response of a window reports its own time as the reset time, so it is not trusted yet", {
+  log <- local_ors(list(raw_ok(headers = limits(2000, 1999, reset = 1e9))))
+
+  ors_request("directions", "/v2/directions/driving-hgv")
+  log$now <- log$now + 2
+
+  expect_true(is.na(ors_remaining_quota("route")))
+})
+
+test_that("a number with no reset time is trusted", {
+  local_ors(list(raw_ok(headers = limits(2000, 40, reset = NA_real_))))
+
+  ors_request("directions", "/v2/directions/driving-hgv")
+
+  expect_equal(ors_remaining_quota("route"), 40)
+})
+
+test_that("a kind of request must be route or geocode", {
+  expect_error(ors_remaining_quota("weather"), "should be one of")
+})

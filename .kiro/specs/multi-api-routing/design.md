@@ -102,6 +102,7 @@ A provider is a named list of functions, registered with `register_provider()` (
 | `validate_credentials()` | TRUE/FALSE or an error with guidance |
 | `limits` (optional) | a list with `requests_per_minute`, used for throttling |
 | `profile` (optional) | a string naming the routing profile (for example `"driving-hgv"`); part of the cache key |
+| `remaining_quota(kind)` (optional) | how many requests are left today for `"route"` or `"geocode"`, or NA if not known; lets a run announce and respect the quota |
 
 Registration is checked (`register_provider()`): the three functions must exist and accept at least 1, 2 and 0 arguments (or `...`), `limits$requests_per_minute` must be a positive number, `profile` a non-empty string, and the name a lower-case string of letters, digits and underscores. A bad provider is rejected with a message naming the problem, so mistakes show up at registration, not mid-run. Registering an existing name is an error unless `overwrite = TRUE`. The registry and the active provider are kept in a package-level environment for the session. `truckr_get_provider()` returns the active name or `NULL`; the internal `resolve_provider()` (used by `route()`) turns a missing provider into the "No routing provider is configured" error (Requirement 1.4). No provider is chosen automatically, even when only one is registered.
 
@@ -234,6 +235,21 @@ The cache stores answers the provider has already given, so the package never pa
 - **Secrets:** all text in a result goes through `redact_key()` before it is saved, so an API key can never reach the cache even if a provider returns one in a message or URL.
 - **Minimum R version:** `tools::R_user_dir()` needs R 4.0, so the package now requires R 4.0.0 or newer.
 
+### 9. Request engine and quota (internal, Task 11)
+
+`cached_requests(items, store, fetch, remaining, cost, label, provider_name)` is the one loop that does what geocoding and routing have in common. For each distinct thing to look up it uses the saved answer if there is one, otherwise asks the provider, saves the answer, and keeps going. Task 12 uses it for both geocoding and routing.
+
+- **Before the first request** it prints what is needed: for example "Routing: 340 requests needed (120 of 460 already saved); about 196 remain today." If the quota will not be enough it says so: "only about 196 remain today, so as many as fit will be requested now and the rest will wait for a re-run after the quota resets." If the provider cannot say how much is left: "the remaining quota is not known yet." (Requirement 12.5)
+- **The remaining quota** comes from the provider's optional `remaining_quota(kind)` function. For ORS (`ors_remaining_quota()`) it is the last `x-ratelimit-remaining` header, but only while the 24-hour window it belongs to has not ended, so an old "0 left" cannot block a new day. It is checked before every request, so the run stops before the quota is used up and never knowingly goes over. A quota that only becomes known after the first response is respected from then on.
+- **The run stops early, without an error,** when: the remaining quota is less than one request, or a request is answered "quota exhausted"; the provider rejects the API key; or several requests in a row fail for a temporary reason (`truckr.max_consecutive_failures`, default 5), which means an outage. A definite answer such as "no route found" does not count as such a failure, and a success starts the count again. Items not requested get a failure result that says why ("quota exhausted; re-run after reset", "not requested: the API key was rejected", "not requested: stopped after 5 requests in a row failed") and are not saved, so a later run requests them. (Requirements 12.6 and 12.7)
+- **Nothing paid for is lost or repeated.** The cache is written when the run ends, however it ends, and saved answers are used first on the next run (Property 16, Property 18). A failed request does not stop the run; temporary failures are not saved and permanent ones are kept for the session only (Property 14).
+- **A bug in a provider cannot crash a run:** an error raised inside the provider's function becomes a temporary failure ("provider error: ..."), with the API key removed.
+- **Messages:** progress every `truckr.progress_every` requests (default 25), and a closing line that says how many were requested, how many were already saved, and, when it stopped early, why and that running again finishes the rest (Requirement 12.3).
+
+`route_segments(segments, geo, provider)` turns the de-duplicated segments and the geocoded locations into the table `assemble_results()` needs (`SegmentId`, `distance_m`, `duration_s`, `error`, plus `error_permanent`, `error_kind` and `source`, which says whether the answer came from the cache, a request, or was not requested). A segment marked `same_place` is left out; two ends with the same coordinates (to five decimals) get distance 0 and time 0 without a request; an end that could not be geocoded gives the error "the start point could not be located: ..." (or "end point"), with no request; and segments whose two pairs of coordinates are identical are requested once. Answers are saved under the provider's name and routing profile, keyed by the rounded coordinates. Because the quota error sits in the segment's `error`, `assemble_results()` shows it on exactly the lanes that depend on that segment, and a waypoint lane whose second leg ran out of quota says "waypoint to destination: quota exhausted; re-run after reset" while keeping its direct distance.
+
+*Pacing.* ORS requests are spaced 1.5 seconds apart (40 a minute, a figure from forum posts that has not been confirmed). A run of 74 segments therefore takes about two minutes and 2,000 about 50 minutes. The spacing is the option `truckr.ors_requests_per_minute`; it can be raised if ORS turns out to allow more.
+
 ## Data Models
 
 ### Route_Result (always present columns)
@@ -344,6 +360,11 @@ When a run stops early (quota exhausted, an error or an interrupt), every answer
 A geocoding result is one of three things: a clean match (an exact match at the requested level whose name, country and, where both are recognizable, state agree with the lane); a doubtful match, which is always marked "CHECK:" with its reasons and `doubtful` TRUE; or a failure that says why. An approximate ("fallback") match, a candidate in a provably different state, a candidate with a different name, and an ambiguous city name are never returned unmarked. A candidate on the wrong level or in another country is never returned at all.
 
 **Validates: Requirements 14.6, 14.14**
+
+### Property 18: A run never knowingly exceeds the quota, and never repeats paid-for work
+When the provider reports its remaining quota, no request is sent once fewer than one request remains. Every item not requested is returned with the error "quota exhausted; re-run after reset". Running again requests only the items that were not answered, and a run in which everything is saved sends no request at all.
+
+**Validates: Requirements 12.5, 12.6**
 
 ## Error Handling
 

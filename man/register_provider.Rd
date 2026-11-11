@@ -35,9 +35,13 @@ contain these functions:
     (for example that an API key is present).
 }
 It may also contain \code{limits}, a list with \code{requests_per_minute}
-(a positive number) used to throttle requests, and \code{profile}, a single
+(a positive number) used to throttle requests; \code{profile}, a single
 string naming the routing profile (for example \code{"driving-hgv"}), which
-is part of the cache key. Other elements are ignored.
+is part of the cache key; and \code{remaining_quota}, a function taking the
+kind of request (\code{"route"} or \code{"geocode"}) and returning how many
+requests are left today, or \code{NA} if that is not known. It lets a run
+tell you up front whether it will fit and stop cleanly before the quota is
+used up. Other elements are ignored.
 }
 \details{
 The registration is checked: each function must exist and accept enough

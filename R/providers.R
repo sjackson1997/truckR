@@ -26,9 +26,13 @@
 #'     (for example that an API key is present).
 #' }
 #' It may also contain \code{limits}, a list with \code{requests_per_minute}
-#' (a positive number) used to throttle requests, and \code{profile}, a single
+#' (a positive number) used to throttle requests; \code{profile}, a single
 #' string naming the routing profile (for example \code{"driving-hgv"}), which
-#' is part of the cache key. Other elements are ignored.
+#' is part of the cache key; and \code{remaining_quota}, a function taking the
+#' kind of request (\code{"route"} or \code{"geocode"}) and returning how many
+#' requests are left today, or \code{NA} if that is not known. It lets a run
+#' tell you up front whether it will fit and stop cleanly before the quota is
+#' used up. Other elements are ignored.
 #'
 #' The registration is checked: each function must exist and accept enough
 #' arguments, so a mistake is reported here and not in the middle of a long run.
@@ -237,6 +241,17 @@ validate_provider <- function(provider, name) {
     rpm <- limits[["requests_per_minute"]]
     if (!is.null(rpm) && (!is.numeric(rpm) || length(rpm) != 1 || is.na(rpm) || rpm <= 0)) {
       fail(msg)
+    }
+  }
+
+  remaining_quota <- provider[["remaining_quota"]]
+  if (!is.null(remaining_quota)) {
+    if (!is.function(remaining_quota)) {
+      fail("`remaining_quota` must be a function.")
+    }
+    args <- names(formals(remaining_quota))
+    if (!"..." %in% args && length(args) < 1) {
+      fail("`remaining_quota` must accept at least 1 argument (the kind of request: \"route\" or \"geocode\").")
     }
   }
 

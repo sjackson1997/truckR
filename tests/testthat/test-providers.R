@@ -206,3 +206,25 @@ test_that("resolve_provider rejects an unknown explicit name", {
 
   expect_error(resolve_provider("nope"), "`nope` is not registered")
 })
+
+# --- The optional remaining_quota function -------------------------------------------------------------------------
+
+test_that("a provider may report its remaining quota", {
+  local_empty_registry()
+
+  expect_no_error(register_provider("with_quota", fake_provider(remaining_quota = function(kind) 5)))
+  expect_no_error(register_provider("dots_quota", fake_provider(remaining_quota = function(...) 5)))
+})
+
+test_that("remaining_quota must be a function that takes the kind of request", {
+  local_empty_registry()
+
+  expect_error(
+    register_provider("bad", fake_provider(remaining_quota = 5)),
+    "`remaining_quota` must be a function"
+  )
+  expect_error(
+    register_provider("bad", fake_provider(remaining_quota = function() 5)),
+    "`remaining_quota` must accept at least 1 argument"
+  )
+})
