@@ -405,3 +405,14 @@ No test infrastructure exists yet; Phase 1 adds `testthat` (3rd edition) to Sugg
 ## Spike status
 
 The verification spike (key works, long routes work, rate-limit headers captured, Mexican postal code problem found) is complete; results are recorded in section 6. It used 7 geocoding and 4 directions requests of the 24-hour quota (the final headers showed 93 and 196 remaining).
+
+## Live verification (Task 13)
+
+One live run of `route()` on 12 lanes: 10 lanes taken evenly from `df_route_samples` (every 8th row) and 2 Mexico-to-California lanes through a Laredo waypoint (Mexico City to Los Angeles, Guadalajara to San Diego).
+
+- **Requests used.** 20 locations geocoded and 16 routes requested, which agrees with the up-front messages. The quota counters went from 2,000 to 1,984 for directions and from 3,000 to 2,979 for geocoding. The one extra geocoding request is the fallback described below. The run took 55 seconds, which is the 40-per-minute throttle at work.
+- **Results.** All 12 lanes got a distance and duration, with no errors. Hand checks: the Mexico City to Los Angeles direct route is 1,933 miles and 38.4 hours; going through Laredo is 2,104 miles (a detour of 171 miles). Guadalajara to San Diego is 1,491 miles direct and 1,986 miles through Laredo (a detour of 495 miles). On both waypoint lanes the routed values are larger than the direct ones, as they should be. Average speeds are 50 to 55 mph on the heavy-goods-vehicle profile, and the other lanes (for example Stoney Creek to Saint-Laurent at 379 miles, Zapopan to Stoney Creek at 2,473 miles) are in the expected range.
+- **Flags.** One lane was flagged: the Canadian postal code L4H3N5 (Woodbridge, ON) was not matched, so the location was found by city instead, with the note in `geocode_flag`. No lane needed `geocode_check`. Mexican origins (Mexico City, Guadalajara, Zapopan, Salinas Victoria) were all located by city and state, as designed.
+- **Second run.** A fresh R session ran the same lanes again with no requests at all ("all 20 are already saved", "all 16 are already saved") and identical numbers, so the disk cache works across sessions. The cache holds 20 geocoding and 16 route entries.
+- **Surprise.** `df_route_samples` is not all Canada: it also has US and Mexican places (Tulsa, Las Vegas, Salinas Victoria and others). It is a better test set than expected.
+- **Not covered by this run.** Street addresses, a lane that cannot be geocoded, and quota exhaustion were not exercised live (they are covered offline). The routed-versus-direct comparison was done by eye on two lanes only.

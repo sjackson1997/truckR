@@ -114,11 +114,11 @@ Working rules for every task:
   - Done when: offline end-to-end tests pass, row count and order match the input, and the always-present columns exist in every scenario. (They do: `route(df, waypoint = NULL, provider = NULL)` is in `R/route.R`; the ORS provider is registered at load and made active in `R/zzz.R` unless the user already chose another; locations given as coordinates are never geocoded; 1,487 checks pass.)
   - _Requirements: 1.1, 1.3, 1.4, 6.1, 9.4, 12.1, 12.2, 13.1, 14.15_
 
-- [ ] 13. LIVE end-to-end verification on a small subset
+- [x] 13. LIVE end-to-end verification on a small subset
   - Run `route()` against about 10 lanes from `df_route_samples` plus 2 Mexico-to-California fixture lanes with a Laredo waypoint (budget: about 25 directions and 25 geocoding requests, fewer with caching; check remaining quota first and stop if under budget).
   - Check by hand: distances look plausible, `distance_routed` is at least `distance_direct` on waypoint lanes, durations are consistent with distances, `has_waypoint` is correct, and a second identical run uses no new requests.
   - Record any surprises in the design document.
-  - Done when: results are verified and written up, and a second run is served entirely from cache.
+  - Done when: results are verified and written up, and a second run is served entirely from cache. (Done: 12 lanes, 20 geocoding and 16 routing requests, second run in a new session made no requests; written up in design.md under 'Live verification'.)
   - _Requirements: 6.1, 13.6, 13.7, 13.8, 13.10, 14.4_
 
 - [ ] 14. Documentation and release hygiene
