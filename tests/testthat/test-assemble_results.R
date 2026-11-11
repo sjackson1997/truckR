@@ -38,7 +38,8 @@ finish <- function(s, results, flags = NULL, provider = "fake", ...) {
 
 always_cols <- c(
   "RouteId", "distance_direct", "distance_routed", "duration_direct",
-  "duration_routed", "has_waypoint", "provider_name", "route_error", "geocode_flag"
+  "duration_routed", "has_waypoint", "provider_name", "route_error", "geocode_flag",
+  "geocode_check"
 )
 waypoint_cols <- c("waypoint_value", "waypoint_type", "detour_added", "detour_duration_added")
 
@@ -394,6 +395,32 @@ test_that("a waypoint note is not shown on lanes that do not use the waypoint", 
   out <- finish(s, mixed_results(), flags = flags)
 
   expect_equal(out$geocode_flag, c(NA, "waypoint: note", NA))
+})
+
+test_that("geocode_check is TRUE only for lanes with a location marked CHECK", {
+  s <- mixed()
+  la <- s$built$locations$location_key[which(s$built$locations$city == "LOS ANGELES")]
+  flags <- data.frame(
+    location_key = c(la, s$built$waypoint_key),
+    flag = c("CHECK: may be the wrong place", "country inferred as USA"),
+    stringsAsFactors = FALSE
+  )
+
+  out <- finish(s, mixed_results(), flags = flags)
+
+  # Lanes 1 and 2 go to Los Angeles; lane 3 goes to San Diego.
+  expect_equal(out$geocode_check, c(TRUE, TRUE, FALSE))
+})
+
+test_that("an ordinary note does not set geocode_check, and the waypoint can", {
+  s <- mixed()
+  plain <- data.frame(location_key = s$built$waypoint_key, flag = "country inferred as USA", stringsAsFactors = FALSE)
+  check <- data.frame(location_key = s$built$waypoint_key, flag = "CHECK: waypoint doubtful", stringsAsFactors = FALSE)
+
+  expect_equal(finish(s, mixed_results(), flags = plain)$geocode_check, c(FALSE, FALSE, FALSE))
+  # Only the lane that uses the waypoint is affected.
+  expect_equal(finish(s, mixed_results(), flags = check)$geocode_check, c(FALSE, TRUE, FALSE))
+  expect_equal(finish(s, mixed_results())$geocode_check, c(FALSE, FALSE, FALSE))
 })
 
 # --- Other inputs --------------------------------------------------------------------------------------------------------

@@ -56,7 +56,10 @@ combine_messages <- function(...) {
 #'     otherwise the reason (a failed lookup, a flagged lane, or a failed
 #'     sanity check);
 #'   \item \code{geocode_flag}: \code{NA} when there is nothing to report,
-#'     otherwise a note about a location.
+#'     otherwise a note about a location;
+#'   \item \code{geocode_check}: \code{TRUE} when a location of the lane
+#'     (origin, destination or waypoint) has a note starting "CHECK:", meaning
+#'     the place found may be the wrong one; \code{FALSE} otherwise.
 #' }
 #' Added only when at least one lane uses a waypoint (and \code{NA} for lanes
 #' that do not): \code{waypoint_value}, \code{waypoint_type},
@@ -129,7 +132,8 @@ assemble_results <- function(df, prepped, built, seg_results, waypoint = NULL,
 
   always_cols <- c(
     "RouteId", "distance_direct", "distance_routed", "duration_direct",
-    "duration_routed", "has_waypoint", "provider_name", "route_error", "geocode_flag"
+    "duration_routed", "has_waypoint", "provider_name", "route_error", "geocode_flag",
+    "geocode_check"
   )
   waypoint_cols <- c("waypoint_value", "waypoint_type", "detour_added", "detour_duration_added")
   clash <- intersect(names(df), c(always_cols, if (any_waypoint) waypoint_cols))
@@ -244,11 +248,16 @@ assemble_results <- function(df, prepped, built, seg_results, waypoint = NULL,
     location_key(x)
   }
   waypoint_key <- rep_len(built$waypoint_key, n_lanes)
+  origin_note <- only_if(location_note(side_keys("orig_")), valid)
+  dest_note <- only_if(location_note(side_keys("dest_")), valid)
+  waypoint_note <- only_if(location_note(waypoint_key), waypoint_lane)
   geocode_flag <- combine_messages(
-    only_if(label("origin: ", location_note(side_keys("orig_"))), valid),
-    only_if(label("destination: ", location_note(side_keys("dest_"))), valid),
-    only_if(label("waypoint: ", location_note(waypoint_key)), waypoint_lane)
+    label("origin: ", origin_note),
+    label("destination: ", dest_note),
+    label("waypoint: ", waypoint_note)
   )
+  needs_check <- function(note) !is.na(note) & startsWith(note, "CHECK:")
+  geocode_check <- needs_check(origin_note) | needs_check(dest_note) | needs_check(waypoint_note)
 
   # --- Back to one row per input row --------------------------------------------------------
   row_lane <- match(lanes$RouteId, lt$RouteId)
@@ -264,6 +273,7 @@ assemble_results <- function(df, prepped, built, seg_results, waypoint = NULL,
   out$provider_name <- rep_len(as.character(provider_name), n)
   out$route_error <- route_error[row_lane]
   out$geocode_flag <- geocode_flag[row_lane]
+  out$geocode_check <- geocode_check[row_lane]
 
   if (any_waypoint) {
     out$waypoint_value <- rep(NA_character_, n)

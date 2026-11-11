@@ -106,12 +106,12 @@ Working rules for every task:
   - Done when: the stop-and-resume behavior is verified offline. (It is: 1,408 tests pass.)
   - _Requirements: 6.5, 9.6, 11.2, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 
-- [ ] 12. Implement `route()` and the `provider_ors` registration
+- [x] 12. Implement `route()` and the `provider_ors` registration
   - The exported entry point: validate arguments (Task 2), prepare lanes (Task 3), build segments (Task 4), geocode unique locations (Tasks 7 and 10), route unique segments (Tasks 7, 9 and 11), assemble results (Task 6).
   - Register the ORS provider at package load; `route()` uses the active provider.
   - Pass each location's geocode `flag` to `assemble_results()` as `location_flags`, and extend `assemble_results()` with the always-present logical column `geocode_check`: TRUE for a lane when any of its locations (origin, destination, waypoint) has a flag starting "CHECK:", FALSE otherwise (Requirement 14.15). Add it to the always-present column lists in the tests.
   - Full offline end-to-end tests with a fake provider: `df_route_samples` with no waypoint column; a Mexico-to-California fixture with `Use_Waypoint` and a Laredo waypoint; a lane with a failed geocode; a lane with a failed leg.
-  - Done when: offline end-to-end tests pass, row count and order match the input, and the always-present columns exist in every scenario.
+  - Done when: offline end-to-end tests pass, row count and order match the input, and the always-present columns exist in every scenario. (They do: `route(df, waypoint = NULL, provider = NULL)` is in `R/route.R`; the ORS provider is registered at load and made active in `R/zzz.R` unless the user already chose another; locations given as coordinates are never geocoded; 1,487 checks pass.)
   - _Requirements: 1.1, 1.3, 1.4, 6.1, 9.4, 12.1, 12.2, 13.1, 14.15_
 
 - [ ] 13. LIVE end-to-end verification on a small subset
